@@ -4,13 +4,14 @@ public class RecvBuffer
 {
     public  ArraySegment<byte> ReadSegment;
     public ArraySegment<byte> WriteSegment;
+    public int DataSize => _buffer.Count - _readPos;
+    public int FreeSize => DataSize - _writePos;
+    
     
     private ArraySegment<byte> _buffer;
-        
     private int _readPos;
     private int _writePos;
-    private int DataSize => _buffer.Count - _readPos;
-    private int FreeSize => DataSize - _writePos;
+
     
     // 생성자 초기화
     public RecvBuffer(int bufferSize)

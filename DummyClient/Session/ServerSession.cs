@@ -1,10 +1,10 @@
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
-using ServerSkills.Packet;
+using ServerSkills;
 
-namespace ServerSkills;
+namespace DummyClient.Session;
 
-public partial class ClientSession : PacketSession
+public partial class ServerSession : PacketSession
 {
     public override void OnRecvPacket(ArraySegment<byte> buffer)
     {
@@ -26,6 +26,8 @@ public partial class ClientSession : PacketSession
     
     public override void OnConnected()
     {
+        C_Connected connectedPacket = new C_Connected();
+        Send(connectedPacket);
     }
 
     public override void OnDisconnected()

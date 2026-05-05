@@ -24,6 +24,19 @@ public abstract class Session
 
         RegisterRecv();
     }
+    
+    public void Send(ArraySegment<byte> buffer)
+    {
+        if (buffer.Count == 0)
+            return;
+
+        lock (_lock)
+        {
+            _sendQueue.Enqueue(buffer);
+            if (_pendingList.Count == 0)
+                RegisterSend();
+        }
+    }
 
     private void RegisterRecv()
     {

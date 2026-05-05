@@ -1,7 +1,10 @@
+using DummyClient.Session;
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
+using ServerSkills;
+using ServerSkills.Packet;
 
-namespace ServerSkills.Packet;
+namespace DummyClient;
 
 public class PacketManager
 {
@@ -20,11 +23,11 @@ public class PacketManager
 
     private void Register()
     {
-        _onRecv.Add((ushort)MsgId.CConnected, MakePacket<C_Connected>);
-        _handler.Add((ushort)MsgId.CConnected, PacketHandler.C_ConnectedHandler);       
-    }
+        _onRecv.Add((ushort)MsgId.SConnected, MakePacket<S_Connected>);
+        _handler.Add((ushort)MsgId.SConnected, PacketHandler.S_ConnectedHandler);       
+    }    
 
-    public void OnRecvPacket(ClientSession session, ArraySegment<byte> buffer)
+    public void OnRecvPacket(ServerSession session, ArraySegment<byte> buffer)
     {
         ushort count = 0;
 

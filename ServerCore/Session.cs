@@ -5,8 +5,8 @@ namespace ServerCore;
 public abstract class Session
 {
     private Socket _socket;
-    private SocketAsyncEventArgs _recvArgs;
-    private SocketAsyncEventArgs _sendArgs;
+    private SocketAsyncEventArgs _recvArgs = new SocketAsyncEventArgs();
+    private SocketAsyncEventArgs _sendArgs = new SocketAsyncEventArgs();
 
     private RecvBuffer _recvBuffer = new RecvBuffer(65535);
     private Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
@@ -18,7 +18,7 @@ public abstract class Session
     public void Start(Socket acceptSocket)
     {
         _socket = acceptSocket;
-
+        
         _recvArgs.Completed += OnRecvCompleted;
         _sendArgs.Completed += OnSendCompleted;
 

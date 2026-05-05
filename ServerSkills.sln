@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerCore", "ServerCore\ServerCore.csproj", "{D8EE91FC-1675-469A-BA77-816BE1D71B22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DummyClient", "DummyClient\DummyClient.csproj", "{F4BAC0B3-4C10-4404-B31B-9C22397A8B07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{D8EE91FC-1675-469A-BA77-816BE1D71B22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8EE91FC-1675-469A-BA77-816BE1D71B22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8EE91FC-1675-469A-BA77-816BE1D71B22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4BAC0B3-4C10-4404-B31B-9C22397A8B07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4BAC0B3-4C10-4404-B31B-9C22397A8B07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4BAC0B3-4C10-4404-B31B-9C22397A8B07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4BAC0B3-4C10-4404-B31B-9C22397A8B07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

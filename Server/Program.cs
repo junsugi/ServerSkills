@@ -11,6 +11,12 @@ class Program
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 5555);
         
         listner = new Listener();
-        // listner.Init(endPoint, () => new Session());
+        listner.Init(endPoint, () => new ClientSession());
+
+        Console.WriteLine($"Listening on {endPoint.Address}:{endPoint.Port}");
+        while (true)
+        {
+            
+        }
     }
 }

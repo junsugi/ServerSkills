@@ -5,7 +5,7 @@ namespace ServerSkills.Packet;
 
 public class PacketManager
 {
-    public static PacketManager Instacne => new PacketManager();
+    public static PacketManager Instance => new PacketManager();
 
     private Dictionary<ushort, Action<PacketSession, ArraySegment<byte>, ushort>> _onRecv =
         new Dictionary<ushort, Action<PacketSession, ArraySegment<byte>, ushort>>();

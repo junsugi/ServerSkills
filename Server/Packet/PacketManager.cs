@@ -1,4 +1,5 @@
 using Google.Protobuf;
+using Google.Protobuf.Protocol;
 
 namespace ServerSkills.Packet;
 
@@ -19,7 +20,8 @@ public class PacketManager
 
     private void Register()
     {
-        // 패킷과 핸들러 등록
+        _onRecv.Add((ushort)MsgId.CConnected, MakePacket<C_Connected>);
+        _handler.Add((ushort)MsgId.CConnected, PacketHandler.C_ConnectedHandler);       
     }
 
     public void OnRecvPacket(ClientSession session, ArraySegment<byte> buffer)

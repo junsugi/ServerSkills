@@ -15,4 +15,23 @@ public class PacketHandler
         ResultCode resultCode = connectedPacket.Result;
         serverSession.HandleSConnected(resultCode);
     }
+
+    public static void S_LoginHandler(PacketSession session, IMessage packet)
+    {
+        S_Login loginPacket = new S_Login();
+        ServerSession serverSession = (ServerSession)session;
+        
+        ResultCode resultCode = loginPacket.Result;
+        serverSession.HandleSLogin(resultCode);
+    }
+
+    public static void S_EnterGameHandler(PacketSession session, IMessage packet)
+    {
+        S_EnterGame enterGamePacket = (S_EnterGame)packet;
+        ServerSession serverSession = (ServerSession)session;
+        
+        ResultCode resultCode = enterGamePacket.Result;
+        PlayerInfo playerInfo = enterGamePacket.Player;
+        serverSession.HandleSEnterGame(resultCode, playerInfo);
+    }
 }

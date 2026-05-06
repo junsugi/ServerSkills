@@ -10,10 +10,11 @@ public class Connector
 
     public void Connect(EndPoint endPoint, Func<Session> sessionFactory, int count = 1)
     {
+        _sessionFactory = sessionFactory;
+        
         for (int i = 0; i < count; i++)
         {
             Socket socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            _sessionFactory += sessionFactory;
         
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += OnConnectCompleted;

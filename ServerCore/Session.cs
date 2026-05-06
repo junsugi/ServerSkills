@@ -61,7 +61,7 @@ public abstract class Session
 
     private void OnRecvCompleted(object sender, SocketAsyncEventArgs args)
     {
-        if (args.SocketError == SocketError.Success)
+        if (args.BytesTransferred > 0 && args.SocketError == SocketError.Success)
         {
             try
             {

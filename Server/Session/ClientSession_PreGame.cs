@@ -23,13 +23,15 @@ public partial class ClientSession(IAccountService accountService, PacketProfile
         Send(connectedPacket);
     }
 
-    public void HandleCLogin(string id)
+    public void HandleCLogin(int requestId, string id)
     {
         S_Login loginPacket = new S_Login();
+        loginPacket.RequestId = requestId;
         
         if (_sessionState != SessionState.Connected)
         {
             loginPacket.Result = ResultCode.InvalidRequest;
+            loginPacket.RequestId = requestId;
             Send(loginPacket);
             return;
         }
@@ -49,17 +51,19 @@ public partial class ClientSession(IAccountService accountService, PacketProfile
         Send(loginPacket);
     }
 
-    public void HandleCEnterGame()
+    public void HandleCEnterGame(int requestId)
     {
         Stopwatch sw = Stopwatch.StartNew();
 
         try
         {
             S_EnterGame enterGamePacket = new S_EnterGame();
+            enterGamePacket.RequestId = requestId;
 
             if (_sessionState != SessionState.Authenticated)
             {
                 enterGamePacket.Result = ResultCode.InvalidRequest;
+                enterGamePacket.RequestId = requestId;
                 Send(enterGamePacket);
                 return;
             }

@@ -27,6 +27,7 @@ public partial class ServerSession : PacketSession
     public override void OnConnected()
     {
         C_Connected connectedPacket = new C_Connected();
+        connectedPacket.RequestId = 0;
         Send(connectedPacket);
     }
 

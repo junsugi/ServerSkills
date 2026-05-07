@@ -11,7 +11,6 @@ public class PlayerFactory
     {
         Player player = new Player()
         {
-            ObjectId = ObjectManager.Instance.GenerateId(GameObjectType.PLAYER, dto.Id),
             NickName = dto.NickName,
             Hp = 100,
             Atk = 5,

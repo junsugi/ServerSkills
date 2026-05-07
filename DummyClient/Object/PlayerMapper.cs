@@ -8,8 +8,8 @@ public static class PlayerMapper
     {
         Player player = new Player()
         {
-            Id = playerInfo.Id,
-            DisplayName = playerInfo.DisplayName,
+            ObjectId = playerInfo.ObjectInfo.ObjectId,
+            NickName = playerInfo.ObjectInfo.NickName,
             Hp = playerInfo.Hp,
             Atk = playerInfo.Atk,
             Def = playerInfo.Def,

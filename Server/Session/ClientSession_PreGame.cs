@@ -51,26 +51,30 @@ public partial class ClientSession(IAccountService accountService, PacketProfile
 
     public void HandleCEnterGame()
     {
-        S_EnterGame enterGamePacket = new S_EnterGame();
-        
-        if (_sessionState != SessionState.Authenticated)
-        {
-            enterGamePacket.Result = ResultCode.InvalidRequest;
-            Send(enterGamePacket);
-            return;
-        }
-        
         Stopwatch sw = Stopwatch.StartNew();
-        sw.Start();
-        
-        MyPlayer = PlayerFactory.Create(_accountDto!);
-        ObjectManager.Instance.Add(MyPlayer);
-        
-        enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
-        enterGamePacket.Result = ResultCode.Success;
-        Send(enterGamePacket);
-        
-        sw.Stop();
-        profiler.Record(nameof(S_EnterGame), sw.ElapsedMilliseconds);
+
+        try
+        {
+            S_EnterGame enterGamePacket = new S_EnterGame();
+
+            if (_sessionState != SessionState.Authenticated)
+            {
+                enterGamePacket.Result = ResultCode.InvalidRequest;
+                Send(enterGamePacket);
+                return;
+            }
+
+            MyPlayer = PlayerFactory.Create(_accountDto!);
+            ObjectManager.Instance.Add(MyPlayer);
+
+            enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
+            enterGamePacket.Result = ResultCode.Success;
+            Send(enterGamePacket);
+        }
+        finally
+        {
+            sw.Stop();
+            profiler.Record("S_ENTER_GAME.Direct", sw.ElapsedMilliseconds);
+        }
     }
 }

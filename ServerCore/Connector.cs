@@ -8,7 +8,7 @@ public class Connector
 {
     private Func<Session> _sessionFactory;
 
-    public void Connect(EndPoint endPoint, Func<Session> sessionFactory, int count = 1)
+    public void Connect(EndPoint endPoint, Func<Session> sessionFactory, int count = 1, int delayMs = 0)
     {
         _sessionFactory = sessionFactory;
         
@@ -23,7 +23,8 @@ public class Connector
 
             RegisterConnect(args);
             
-            Thread.Sleep(100);
+            if (delayMs > 0)
+                Thread.Sleep(delayMs);
         }
     }
 

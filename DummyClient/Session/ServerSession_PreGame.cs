@@ -9,7 +9,7 @@ public partial class ServerSession : PacketSession
 {
     private DummyClient _dummyClient;
     private SessionState _sessionState = SessionState.None;
-
+   
     public void SetClient(DummyClient dummyClient)
     {
         _dummyClient = dummyClient;
@@ -37,14 +37,14 @@ public partial class ServerSession : PacketSession
 
     public void HandleSEnterGame(ResultCode resultCode, PlayerInfo playerInfo)
     {
-        Player? player = resultCode == ResultCode.Success 
-            ? PlayerMapper.ToDomain(playerInfo) 
+        Player? player = resultCode == ResultCode.Success
+            ? PlayerMapper.ToDomain(playerInfo)
             : null;
-        
+
         _sessionState = resultCode == ResultCode.Success
             ? SessionState.EnterGame
             : SessionState.Authenticated;
-        
+
         _dummyClient.OnEnterGame(resultCode, player);
     }
 }

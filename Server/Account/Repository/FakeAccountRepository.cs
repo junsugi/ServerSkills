@@ -4,15 +4,16 @@ namespace ServerSkills.Login;
 
 public class FakeAccountRepository : IAccountRepository
 {
-    private Faker _faker = new Faker();
+    private int _nextDbId = 0;
+    private Faker _faker = new();
     
     public Account? TryGetById(string id)
     {
         Account account = new Account()
         {
-            DbId = _faker.Random.Int(),
-            Id = _faker.Internet.Email(),
-            DisplayName = _faker.Name.FullName(),
+            Id = Interlocked.Increment(ref _nextDbId),
+            Email = _faker.Internet.Email(),
+            NickName = _faker.Internet.UserName()
         };
 
         return account;

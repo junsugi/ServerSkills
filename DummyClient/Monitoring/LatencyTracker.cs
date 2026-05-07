@@ -5,49 +5,54 @@ namespace ServerSkills.Monitoring;
 
 public sealed class LatencyTracker
 {
-    private readonly ConcurrentDictionary<int, long> _pendingRequests = new();
-    private readonly ConcurrentQueue<long> _samples = new();
+    private readonly ConcurrentDictionary<int, PendingRequest> _pendingRequests = new();
+    private readonly ConcurrentDictionary<string, ConcurrentQueue<long>> _samples = new();
 
-    public void Start(int requestId)
+    public void Start(int requestId, string name)
     {
-        _pendingRequests[requestId] = Stopwatch.GetTimestamp();
+        _pendingRequests[requestId] = new PendingRequest(name, Stopwatch.GetTimestamp());
     }
 
     public bool Complete(int requestId)
     {
-        if (!_pendingRequests.TryRemove(requestId, out long start))
+        if (!_pendingRequests.TryRemove(requestId, out PendingRequest pending))
             return false;
 
         long end = Stopwatch.GetTimestamp();
-        long elapsedMs = (end - start) * 1000 / Stopwatch.Frequency;
+        long elapsedMs = (end - pending.StartTimestamp) * 1000 / Stopwatch.Frequency;
 
-        _samples.Enqueue(elapsedMs);
+        ConcurrentQueue<long> queue =
+            _samples.GetOrAdd(pending.Name, _ => new ConcurrentQueue<long>());
+        
+        queue.Enqueue(elapsedMs);
         return true;
     }
     
-    public LatencySnapshot SnapshotAndClear()
+    public IEnumerable<LatencySnapshot> SnapshotAndClearAll()
     {
-        List<long> samples = new();
-
-        while (_samples.TryDequeue(out long elapsedMs))
+        foreach (var pair in _samples)
         {
-            samples.Add(elapsedMs);
+            List<long> values = new();
+
+            while (pair.Value.TryDequeue(out long elapsedMs))
+                values.Add(elapsedMs);
+
+            if (values.Count == 0)
+                continue;
+
+            values.Sort();
+
+            yield return new LatencySnapshot
+            {
+                Name = pair.Key,
+                Count = values.Count,
+                Avg = values.Average(),
+                Min = values[0],
+                Max = values[^1],
+                P95 = Percentile(values, 0.95),
+                P99 = Percentile(values, 0.99)
+            };
         }
-
-        if (samples.Count == 0)
-            return LatencySnapshot.Empty;
-
-        samples.Sort();
-
-        return new LatencySnapshot
-        {
-            Count = samples.Count,
-            Avg = samples.Average(),
-            Min = samples[0],
-            Max = samples[^1],
-            P95 = Percentile(samples, 0.95),
-            P99 = Percentile(samples, 0.99)
-        };
     }
     
     private static long Percentile(List<long> sorted, double percentile)
@@ -56,12 +61,15 @@ public sealed class LatencyTracker
         index = Math.Clamp(index, 0, sorted.Count - 1);
         return sorted[index];
     }
+    
+    private sealed record PendingRequest(string Name, long StartTimestamp);
 }
 
 public sealed class LatencySnapshot
 {
     public static readonly LatencySnapshot Empty = new();
 
+    public string Name { get; init; } = string.Empty;
     public int Count { get; init; }
     public double Avg { get; init; }
     public long Min { get; init; }

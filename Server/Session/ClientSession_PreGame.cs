@@ -23,13 +23,15 @@ public partial class ClientSession(IAccountService accountService, PacketProfile
         Send(connectedPacket);
     }
 
-    public void HandleCLogin(string id)
+    public void HandleCLogin(int requestId, string id)
     {
         S_Login loginPacket = new S_Login();
+        loginPacket.RequestId = requestId;
         
         if (_sessionState != SessionState.Connected)
         {
             loginPacket.Result = ResultCode.InvalidRequest;
+            loginPacket.RequestId = requestId;
             Send(loginPacket);
             return;
         }
@@ -49,28 +51,34 @@ public partial class ClientSession(IAccountService accountService, PacketProfile
         Send(loginPacket);
     }
 
-    public void HandleCEnterGame()
+    public void HandleCEnterGame(int requestId)
     {
-        S_EnterGame enterGamePacket = new S_EnterGame();
-        
-        if (_sessionState != SessionState.Authenticated)
-        {
-            enterGamePacket.Result = ResultCode.InvalidRequest;
-            Send(enterGamePacket);
-            return;
-        }
-        
         Stopwatch sw = Stopwatch.StartNew();
-        sw.Start();
-        
-        MyPlayer = PlayerFactory.Create(_accountDto!);
-        ObjectManager.Instance.Add(MyPlayer);
-        
-        enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
-        enterGamePacket.Result = ResultCode.Success;
-        Send(enterGamePacket);
-        
-        sw.Stop();
-        profiler.Record(nameof(S_EnterGame), sw.ElapsedMilliseconds);
+
+        try
+        {
+            S_EnterGame enterGamePacket = new S_EnterGame();
+            enterGamePacket.RequestId = requestId;
+
+            if (_sessionState != SessionState.Authenticated)
+            {
+                enterGamePacket.Result = ResultCode.InvalidRequest;
+                enterGamePacket.RequestId = requestId;
+                Send(enterGamePacket);
+                return;
+            }
+
+            MyPlayer = PlayerFactory.Create(_accountDto!);
+            ObjectManager.Instance.Add(MyPlayer);
+
+            enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
+            enterGamePacket.Result = ResultCode.Success;
+            Send(enterGamePacket);
+        }
+        finally
+        {
+            sw.Stop();
+            profiler.Record("S_ENTER_GAME.Direct", sw.ElapsedMilliseconds);
+        }
     }
 }

@@ -151,7 +151,7 @@ public abstract class Session
         if (Interlocked.Exchange(ref _isConnected, false) == false)
             throw new Exception("Still connected");
 
-        OnDisconnected();
+        // OnDisconnected();
         _socket.Shutdown(SocketShutdown.Both);
         _socket.Close();
     }

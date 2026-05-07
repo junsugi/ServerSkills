@@ -9,15 +9,15 @@ public partial class ServerSession : PacketSession
 {
     private DummyClient _dummyClient;
     private SessionState _sessionState = SessionState.None;
-
+   
     public void SetClient(DummyClient dummyClient)
     {
         _dummyClient = dummyClient;
     }
 
-    public void HandleSConnected(ResultCode resultCode)
+    public void HandleSConnected(int requestId, ResultCode resultCode)
     {
-        _dummyClient.OnConnected(resultCode);
+        _dummyClient.OnConnected(requestId, resultCode);
 
         bool isSuccess = resultCode == ResultCode.Success;
         _sessionState = isSuccess
@@ -25,9 +25,9 @@ public partial class ServerSession : PacketSession
             : SessionState.None;
     }
 
-    public void HandleSLogin(ResultCode resultCode)
+    public void HandleSLogin(int requestId, ResultCode resultCode)
     {
-        _dummyClient.OnLogin(resultCode);
+        _dummyClient.OnLogin(requestId, resultCode);
 
         bool isSuccess = resultCode == ResultCode.Success;
         _sessionState = isSuccess
@@ -35,16 +35,16 @@ public partial class ServerSession : PacketSession
             : SessionState.Connected;
     }
 
-    public void HandleSEnterGame(ResultCode resultCode, PlayerInfo playerInfo)
+    public void HandleSEnterGame(int requestId, ResultCode resultCode, PlayerInfo playerInfo)
     {
-        Player? player = resultCode == ResultCode.Success 
-            ? PlayerMapper.ToDomain(playerInfo) 
+        Player? player = resultCode == ResultCode.Success
+            ? PlayerMapper.ToDomain(playerInfo)
             : null;
-        
+
         _sessionState = resultCode == ResultCode.Success
             ? SessionState.EnterGame
             : SessionState.Authenticated;
-        
-        _dummyClient.OnEnterGame(resultCode, player);
+
+        _dummyClient.OnEnterGame(requestId, resultCode, player);
     }
 }

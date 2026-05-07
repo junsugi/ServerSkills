@@ -37,25 +37,18 @@ class Program
         while (true)
         {
             await Task.Delay(5000);
-            Print(nameof(S_EnterGame));
+            
+            foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
+            {
+                Console.WriteLine(
+                    $"[{snapshot.Name}] " +
+                    $"Count={snapshot.Count}, " +
+                    $"Avg={snapshot.Avg:F2}ms, " +
+                    $"P95={snapshot.P95}ms, " +
+                    $"P99={snapshot.P99}ms, " +
+                    $"Max={snapshot.Max}ms"
+                );
+            }
         }
-    }
-    
-    private static void Print(string packetName)
-    {
-        PacketProfileSnapshot snapshot =
-            _profiler.SnapshotAndClear(packetName);
-
-        if (snapshot.Count == 0)
-            return;
-
-        Console.WriteLine(
-            $"[{snapshot.PacketName}] " +
-            $"Count={snapshot.Count}, " +
-            $"Avg={snapshot.Avg:F2}ms, " +
-            $"P95={snapshot.P95}ms, " +
-            $"P99={snapshot.P99}ms, " +
-            $"Max={snapshot.Max}ms"
-        );
     }
 }

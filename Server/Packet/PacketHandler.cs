@@ -18,8 +18,9 @@ public class PacketHandler
         C_Login loginPacket =  (C_Login)packet;
         ClientSession clientSession = (ClientSession)session;
 
+        int requestId = loginPacket.RequestId;
         string id = loginPacket.Id;
-        clientSession.HandleCLogin(id);
+        clientSession.HandleCLogin(requestId, id);
     }
 
     public static void C_EnterGameHandler(PacketSession session, IMessage packet)
@@ -27,6 +28,7 @@ public class PacketHandler
         C_EnterGame enterPacket =  (C_EnterGame)packet;
         ClientSession clientSession = (ClientSession)session;
 
-        clientSession.HandleCEnterGame();
+        int requestId = enterPacket.RequestId;
+        clientSession.HandleCEnterGame(requestId);
     }
 }

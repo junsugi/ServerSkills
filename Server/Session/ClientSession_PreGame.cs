@@ -1,12 +1,14 @@
+using System.Diagnostics;
 using Google.Protobuf.Protocol;
 using ServerSkills.Login;
+using ServerSkills.Monitoring;
 
 namespace ServerSkills;
 
-public partial class ClientSession(IAccountService accountService) : PacketSession
+public partial class ClientSession(IAccountService accountService, PacketProfiler profiler) : PacketSession
 {
     public Player MyPlayer;
-    
+
     private SessionState _sessionState = SessionState.None;
     private AccountDto? _accountDto;
     
@@ -57,12 +59,18 @@ public partial class ClientSession(IAccountService accountService) : PacketSessi
             Send(enterGamePacket);
             return;
         }
-
+        
+        Stopwatch sw = Stopwatch.StartNew();
+        sw.Start();
+        
         MyPlayer = PlayerFactory.Create(_accountDto!);
         ObjectManager.Instance.Add(MyPlayer);
         
         enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
         enterGamePacket.Result = ResultCode.Success;
         Send(enterGamePacket);
+        
+        sw.Stop();
+        profiler.Record(nameof(S_EnterGame), sw.ElapsedMilliseconds);
     }
 }

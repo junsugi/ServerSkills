@@ -20,8 +20,7 @@ public class ObjectManager
             if (type == GameObjectType.PLAYER)
             {
                 Player player = gameObject as Player;
-                gameObject.ObjectId = GenerateId(gameObject.ObjectType, player.ObjectId);
-                _players.Add(gameObject.ObjectId, gameObject as Player);
+                _players.Add(player.ObjectId, player);
                 Thread.Sleep(100);
             }
 

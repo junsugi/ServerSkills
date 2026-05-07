@@ -19,7 +19,7 @@ class Program
             serverSession.SetClient(client);
             
             return serverSession;
-        }, 10);
+        }, 1000);
 
         while (true)
         {

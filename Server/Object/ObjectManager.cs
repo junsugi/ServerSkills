@@ -22,6 +22,7 @@ public class ObjectManager
                 Player player = gameObject as Player;
                 gameObject.ObjectId = GenerateId(gameObject.ObjectType, player.ObjectId);
                 _players.Add(gameObject.ObjectId, gameObject as Player);
+                Thread.Sleep(100);
             }
 
             return gameObject;

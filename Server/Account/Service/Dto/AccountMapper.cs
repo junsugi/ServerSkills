@@ -11,9 +11,9 @@ public static class AccountMapper
         
         AccountDto dto = new AccountDto()
         {
-            DbId = account.DbId,
             Id = account.Id,
-            DisplayName = account.DisplayName,
+            Email = account.Email,
+            NickName = account.NickName,
         };
 
         return dto;
@@ -23,8 +23,8 @@ public static class AccountMapper
     {
         Account account = new Account
         {
-            DbId = dto.DbId,
-            Id = dto.Id
+            Id = dto.Id,
+            Email = dto.Email
         };
 
         return account;

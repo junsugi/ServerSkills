@@ -6,10 +6,14 @@ public static class PlayerMapper
 {
     public static PlayerInfo ToDto(Player player)
     {
+        ObjectInfo objectInfo = new ObjectInfo()
+        {
+            ObjectId = player.ObjectId,
+            NickName = player.NickName,
+        };
         PlayerInfo playerInfo = new PlayerInfo()
         {
-            Id = player.Id,
-            DisplayName = player.DisplayName,
+            ObjectInfo = objectInfo,
             Hp = 100,
             Atk = 5,
             Def = 5

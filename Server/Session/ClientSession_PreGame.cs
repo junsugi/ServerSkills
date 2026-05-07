@@ -5,9 +5,10 @@ namespace ServerSkills;
 
 public partial class ClientSession(IAccountService accountService) : PacketSession
 {
+    public Player MyPlayer;
+    
     private SessionState _sessionState = SessionState.None;
     private AccountDto? _accountDto;
-    private Dictionary<string, Player> _players = new Dictionary<string, Player>();
     
     private object _lock = new object();
     
@@ -57,13 +58,10 @@ public partial class ClientSession(IAccountService accountService) : PacketSessi
             return;
         }
 
-        Player player = PlayerFactory.Create(_accountDto!);
-        lock (_lock)
-        {
-            _players.Add(player.Id, player);
-            Console.WriteLine($"{player.Id}: 추가! / {_players.Count}");
-        }
-        enterGamePacket.Player = PlayerMapper.ToDto(player);
+        MyPlayer = PlayerFactory.Create(_accountDto!);
+        ObjectManager.Instance.Add(MyPlayer);
+        
+        enterGamePacket.Player = PlayerMapper.ToDto(MyPlayer);
         enterGamePacket.Result = ResultCode.Success;
         Send(enterGamePacket);
     }

@@ -42,6 +42,6 @@ public class DummyClient
             return;
         
         MyPlayer = player!;
-        Console.WriteLine($"{MyPlayer.Id} / {MyPlayer.DisplayName}");
+        Console.WriteLine($"{MyPlayer.ObjectType} / {MyPlayer.NickName}");
     }
 }

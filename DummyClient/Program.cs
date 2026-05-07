@@ -20,5 +20,10 @@ class Program
             
             return serverSession;
         }, 10);
+
+        while (true)
+        {
+            
+        }
     }
 }

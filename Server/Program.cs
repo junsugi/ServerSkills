@@ -3,6 +3,7 @@ using Google.Protobuf.Protocol;
 using ServerCore;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
+using ServerSkills.Processor;
 
 namespace ServerSkills;
 
@@ -16,11 +17,13 @@ class Program
         
         IAccountRepository accountRepository = new FakeAccountRepository();
         IAccountService accountService = new AccountService(accountRepository);
+        // 테스트용 갈아끼우기
+        IEnterGameProcessor enterGameProcessor = new DirectEnterGameProcessor(_profiler);
         
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 5555);
         
         listener = new Listener();
-        listener.Init(endPoint, () => new ClientSession(accountService, _profiler));
+        listener.Init(endPoint, () => new ClientSession(accountService, enterGameProcessor));
 
         Console.WriteLine($"Listening on {endPoint.Address}:{endPoint.Port}");
 

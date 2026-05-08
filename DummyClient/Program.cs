@@ -32,7 +32,7 @@ class Program
                 }
             }
         });
-        
+
         Func<ServerCore.Session> createSession = () =>
         {
             DummyClient client = new DummyClient(pendingRequestManager);
@@ -50,16 +50,16 @@ class Program
         int delayMs = 500;
 
         List<Task> tasks = new();
-        
-        Connector connector = new Connector();
+
         for (int i = 0; i < workerCount; i++)
         {
             tasks.Add(Task.Run(() =>
             {
+                Connector connector = new Connector();
                 connector.Connect(endPoint, createSession, perWorker, delayMs);
             }));
         }
-        
+
         Task.WaitAll(tasks.ToArray());
         Thread.Sleep(Timeout.Infinite);
     }

@@ -21,22 +21,16 @@ public class DummyClient(PendingRequestManager pendingRequestManager)
 
     public void OnConnected(int requestId, ResultCode resultCode)
     {
-        RequestCompleted(requestId);
-
         if (resultCode != ResultCode.Success)
             return;
 
-        int loginReqId = pendingRequestManager.Register("C_LOGIN", () => { });
         C_Login loginPacket = new C_Login();
         loginPacket.Id = _faker.Name.FullName();
-        loginPacket.RequestId = loginReqId;
         _serverSession.Send(loginPacket);
     }
 
     public void OnLogin(int requestId, ResultCode resultCode)
     {
-        RequestCompleted(requestId);
-
         if (resultCode != ResultCode.Success)
             return;
 

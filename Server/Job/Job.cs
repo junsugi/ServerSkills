@@ -17,7 +17,7 @@ public class Job : IJob
     
     public override void Execute()
     {
-        if (Cancel != false)
+        if (Cancel == false)
             _action.Invoke();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using ServerCore;
+using ServerSkills.Game.Room;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
 
@@ -9,15 +10,18 @@ class Program
 {
     public static Listener listener;
     public static PacketProfiler _profiler = new PacketProfiler();
+
     static void Main(string[] args)
     {
+        Dictionary<int, GameRoom> gameRooms = GameRoomManager.Instance.Creates(4);
+
         IAccountRepository accountRepository = new FakeAccountRepository();
         IAccountService accountService = new AccountService(accountRepository);
-        
+
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 5555);
-        
+
         listener = new Listener();
-        listener.Init(endPoint, () => new ClientSession(EnterGameMode.ObjectManagerJobQueue, accountService, _profiler));
+        listener.Init(endPoint, () => new ClientSession(EnterGameMode.GameRoomJobQueue, accountService, _profiler));
 
         Console.WriteLine($"Listening on {endPoint.Address}:{endPoint.Port}");
 
@@ -33,10 +37,20 @@ class Program
                 await Task.Delay(1);
             }
         });
-        
-        while (true)
+
+        foreach (GameRoom gameRoom in gameRooms.Values)
         {
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    gameRoom.Flush();
+                    await Task.Delay(1);
+                }
+            });
         }
+
+        Thread.Sleep(Timeout.Infinite);
     }
 
     private static async Task MonitoringLoop()
@@ -44,7 +58,7 @@ class Program
         while (true)
         {
             await Task.Delay(5000);
-            
+
             foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
             {
                 Console.WriteLine(
@@ -56,6 +70,8 @@ class Program
                     $"Max={snapshot.Max}ms"
                 );
             }
+
+            GameRoomManager.Instance.PrintRoomStatus();
         }
     }
 }

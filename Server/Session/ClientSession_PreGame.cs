@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Google.Protobuf.Protocol;
+using ServerSkills.Game.Room;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
 
@@ -89,6 +90,20 @@ public partial class ClientSession(
         }
     }
     
+    public void SendEnterGame(int requestId, ResultCode resultCode, Player? player)
+    {
+        S_EnterGame enterGamePacket = new S_EnterGame()
+        {
+            Result = resultCode,
+            RequestId = requestId,
+        };
+        
+        if (player != null)
+            enterGamePacket.Player = PlayerMapper.ToDto(player);
+        
+        Send(enterGamePacket);
+    }
+    
     private void HandleCEnterGameDirectLock(int requestId)
     {
         long startAt = Stopwatch.GetTimestamp();
@@ -141,7 +156,32 @@ public partial class ClientSession(
     
     private void HandleCEnterGameRoomJobQueue(int requestId)
     {
-        throw new NotImplementedException();
+        long handleStartAt = Stopwatch.GetTimestamp();
+        
+        if (!TryPrepareEnterGame(requestId, out Player? player))
+            return;
+        
+        // 게임룸 찾기
+        GameRoom gameRoom = GameRoomManager.Instance.PickRoom(player!);
+        
+        long beforeEnqueue = Stopwatch.GetTimestamp();
+        
+        gameRoom.EnterGame(requestId, player, (roomId, metrics) =>
+        {
+            long responseSentAt = Stopwatch.GetTimestamp();
+
+            profiler.Record($"C_ENTER_GAME.RoomJob.Room{roomId}.QueueWait", ToMs(metrics.StartAt - metrics.EnqueueAt));
+            profiler.Record($"C_ENTER_GAME.RoomJob.Room{roomId}.Execute", ToMs(metrics.EndAt - metrics.StartAt));
+            profiler.Record($"C_ENTER_GAME.RoomJob.Room{roomId}.Total", ToMs(metrics.EndAt - metrics.EnqueueAt));
+
+            profiler.Record("C_ENTER_GAME.RoomJob.QueueWait", ToMs(metrics.StartAt - metrics.EnqueueAt));
+            profiler.Record("C_ENTER_GAME.RoomJob.Execute", ToMs(metrics.EndAt - metrics.StartAt));
+            profiler.Record("C_ENTER_GAME.RoomJob.Total", ToMs(metrics.EndAt - metrics.EnqueueAt));
+            profiler.Record("C_ENTER_GAME.RoomJob.ResponseTotal", ToMs(responseSentAt - handleStartAt));
+        });
+        
+        long afterEnqueue = Stopwatch.GetTimestamp();
+        profiler.Record("C_ENTER_GAME.RoomJob.Enqueue", ToMs(afterEnqueue - beforeEnqueue));
     }
     
     private bool TryPrepareEnterGame(int requestId, out Player? player)
@@ -155,6 +195,7 @@ public partial class ClientSession(
         }
 
         player = PlayerFactory.Create(AccountDto!);
+        player.Session = this;
         return true;
     }
 
@@ -162,20 +203,7 @@ public partial class ClientSession(
     {
         return _sessionState == SessionState.Authenticated;
     }
-
-    private void SendEnterGame(int requestId, ResultCode resultCode, Player? player)
-    {
-        S_EnterGame enterGamePacket = new S_EnterGame()
-        {
-            Result = resultCode,
-            RequestId = requestId,
-        };
-        
-        if (player != null)
-            enterGamePacket.Player = PlayerMapper.ToDto(player);
-        
-        Send(enterGamePacket);
-    }
+    
     
     private static long ToMs(long tick)
     {

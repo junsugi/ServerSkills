@@ -1,9 +1,7 @@
 ﻿using System.Net;
-using Google.Protobuf.Protocol;
 using ServerCore;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
-using ServerSkills.Processor;
 
 namespace ServerSkills;
 
@@ -13,22 +11,28 @@ class Program
     public static PacketProfiler _profiler = new PacketProfiler();
     static void Main(string[] args)
     {
-        
-        
         IAccountRepository accountRepository = new FakeAccountRepository();
         IAccountService accountService = new AccountService(accountRepository);
-        // 테스트용 갈아끼우기
-        IEnterGameProcessor enterGameProcessor = new DirectEnterGameProcessor(_profiler);
         
         IPEndPoint endPoint = new IPEndPoint(IPAddress.Loopback, 5555);
         
         listener = new Listener();
-        listener.Init(endPoint, () => new ClientSession(accountService, enterGameProcessor));
+        listener.Init(endPoint, () => new ClientSession(EnterGameMode.ObjectManagerJobQueue, accountService, _profiler));
 
         Console.WriteLine($"Listening on {endPoint.Address}:{endPoint.Port}");
 
         // 모니터링 시작
         Task.Run(MonitoringLoop);
+
+        // Queue Flush
+        Task.Run(async () =>
+        {
+            while (true)
+            {
+                ObjectManager.Instance.Flush();
+                await Task.Delay(1);
+            }
+        });
         
         while (true)
         {

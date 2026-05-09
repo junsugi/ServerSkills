@@ -2,13 +2,20 @@ using System.Diagnostics;
 using Google.Protobuf.Protocol;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
-using ServerSkills.Processor;
 
 namespace ServerSkills;
 
+public enum EnterGameMode
+{
+    DirectLock,
+    ObjectManagerJobQueue,
+    GameRoomJobQueue
+}
+
 public partial class ClientSession(
+    EnterGameMode enterGameMode,
     IAccountService accountService, 
-    IEnterGameProcessor enterGameProcessor) : PacketSession
+    PacketProfiler profiler) : PacketSession
 {
     public Player MyPlayer;
     public AccountDto? AccountDto;
@@ -65,15 +72,98 @@ public partial class ClientSession(
 
     public void HandleCEnterGame(int requestId)
     {
-        enterGameProcessor.Process(this, requestId);
+        switch (enterGameMode)
+        {
+            case EnterGameMode.DirectLock:
+                HandleCEnterGameDirectLock(requestId);
+                break;
+            case EnterGameMode.ObjectManagerJobQueue:
+                HandleCEnterGameObjectManagerJobQueue(requestId);
+                break;
+            case EnterGameMode.GameRoomJobQueue:
+                HandleCEnterGameRoomJobQueue(requestId);
+                break;
+            default:
+                SendEnterGame(requestId, ResultCode.InvalidRequest, null);
+                break;
+        }
     }
-
-    public bool CanEnterGame()
+    
+    private void HandleCEnterGameDirectLock(int requestId)
     {
-        return _sessionState != SessionState.Authenticated;
+        long startAt = Stopwatch.GetTimestamp();
+
+        if (!TryPrepareEnterGame(requestId, out Player? player))
+            return;
+
+        long addStartAt = Stopwatch.GetTimestamp();
+        ObjectManager.Instance.Add(player!); // lock 있는 Add
+        long addEndAt = Stopwatch.GetTimestamp();
+
+        SetPlayer(player!);
+        MarkEnterGame();
+        SendEnterGame(requestId, ResultCode.Success, player);
+
+        long endAt = Stopwatch.GetTimestamp();
+
+        profiler.Record("C_ENTER_GAME.Direct.ObjectManagerAdd", ToMs(addEndAt - addStartAt));
+        profiler.Record("C_ENTER_GAME.Direct.Total", ToMs(endAt - startAt));
+    }
+    
+    private void HandleCEnterGameObjectManagerJobQueue(int requestId)
+    {
+        long handleStartAt = Stopwatch.GetTimestamp();
+
+        if (!TryPrepareEnterGame(requestId, out Player? player))
+            return;
+
+        long beforeEnqueue = Stopwatch.GetTimestamp();
+
+        ObjectManager.Instance.AddQueued(player!, (addedObject, metrics) =>
+        {
+            Player addedPlayer = (Player)addedObject;
+
+            SetPlayer(addedPlayer);
+            MarkEnterGame();
+            SendEnterGame(requestId, ResultCode.Success, addedPlayer);
+
+            long responseSentAt = Stopwatch.GetTimestamp();
+
+            profiler.Record("C_ENTER_GAME.ObjectManagerJob.QueueWait", ToMs(metrics.StartAt - metrics.EnqueueAt));
+            profiler.Record("C_ENTER_GAME.ObjectManagerJob.Execute", ToMs(metrics.EndAt - metrics.StartAt));
+            profiler.Record("C_ENTER_GAME.ObjectManagerJob.Total", ToMs(metrics.EndAt - metrics.EnqueueAt));
+            profiler.Record("C_ENTER_GAME.ObjectManagerJob.ResponseTotal", ToMs(responseSentAt - handleStartAt));
+        });
+
+        long afterEnqueue = Stopwatch.GetTimestamp();
+        profiler.Record("C_ENTER_GAME.ObjectManagerJob.Enqueue", ToMs(afterEnqueue - beforeEnqueue));
+    }
+    
+    private void HandleCEnterGameRoomJobQueue(int requestId)
+    {
+        throw new NotImplementedException();
+    }
+    
+    private bool TryPrepareEnterGame(int requestId, out Player? player)
+    {
+        player = null;
+
+        if (!CanEnterGame())
+        {
+            SendEnterGame(requestId, ResultCode.InvalidRequest, null);
+            return false;
+        }
+
+        player = PlayerFactory.Create(AccountDto!);
+        return true;
     }
 
-    public void SendEnterGame(int requestId, ResultCode resultCode, Player? player)
+    private bool CanEnterGame()
+    {
+        return _sessionState == SessionState.Authenticated;
+    }
+
+    private void SendEnterGame(int requestId, ResultCode resultCode, Player? player)
     {
         S_EnterGame enterGamePacket = new S_EnterGame()
         {
@@ -85,5 +175,10 @@ public partial class ClientSession(
             enterGamePacket.Player = PlayerMapper.ToDto(player);
         
         Send(enterGamePacket);
+    }
+    
+    private static long ToMs(long tick)
+    {
+        return tick * 1000 / Stopwatch.Frequency;
     }
 }

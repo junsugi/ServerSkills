@@ -1,6 +1,9 @@
+using System.Diagnostics;
+using ServerSkills.Job;
+
 namespace ServerSkills;
 
-public class ObjectManager
+public class ObjectManager: JobSerializer
 {
     public static readonly ObjectManager Instance = new();
 
@@ -26,6 +29,32 @@ public class ObjectManager
 
             return gameObject;
         }
+    }
+
+    public GameObject AddQueued(GameObject gameObject, Action<GameObject, JobMetrics> onAdded)
+    {
+        long enqueueAt = Stopwatch.GetTimestamp();
+        
+        Push(() =>
+        {
+            long startAt = Stopwatch.GetTimestamp();
+            
+            GameObjectType type = GetObjectTypeById(gameObject.ObjectId);
+
+            if (type == GameObjectType.PLAYER)
+            {
+                Player player = gameObject as Player;
+                _players.Add(player.ObjectId, player);
+                Thread.Sleep(100);
+            }
+            
+            long endAt = Stopwatch.GetTimestamp();
+            
+            onAdded(gameObject, new JobMetrics(enqueueAt, startAt, endAt));
+        });
+
+
+        return gameObject;
     }
 
     public int GenerateId(GameObjectType type, int id)

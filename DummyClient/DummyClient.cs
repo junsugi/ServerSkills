@@ -2,12 +2,11 @@ using Bogus;
 using DummyClient.Packet;
 using DummyClient.Session;
 using Google.Protobuf.Protocol;
-using ServerSkills.Monitoring;
 using Player = DummyClient.Object.Player;
 
 namespace DummyClient;
 
-public class DummyClient(PendingRequestManager pendingRequestManager)
+public partial class DummyClient(PendingRequestManager pendingRequestManager)
 {
     public Player MyPlayer { get; private set; }
 
@@ -35,7 +34,7 @@ public class DummyClient(PendingRequestManager pendingRequestManager)
             return;
 
         int enterReqId =
-            pendingRequestManager.Register("C_ENTER_GAME", () => { });
+            pendingRequestManager.Register(nameof(C_EnterGame), () => { });
         C_EnterGame enterGamePacket = new C_EnterGame();
         enterGamePacket.RequestId = enterReqId;
         _serverSession.Send(enterGamePacket);
@@ -49,7 +48,10 @@ public class DummyClient(PendingRequestManager pendingRequestManager)
             return;
 
         MyPlayer = player!;
-        // Console.WriteLine($"{MyPlayer.ObjectType} / {MyPlayer.NickName}");
+        
+        // 아이템 스폰 테스트를 위해 더미 패킷 전송
+        C_ReadyForTest testPacket = new C_ReadyForTest();
+        _serverSession.Send(testPacket);
     }
 
     private void RequestCompleted(int requestId)

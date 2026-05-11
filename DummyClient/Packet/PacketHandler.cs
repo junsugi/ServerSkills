@@ -1,7 +1,8 @@
+using DummyClient.Object;
 using DummyClient.Session;
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
-using ServerSkills;
+using ServerCore;
 
 namespace DummyClient;
 
@@ -36,5 +37,44 @@ public class PacketHandler
         ResultCode resultCode = enterGamePacket.Result;
         PlayerInfo playerInfo = enterGamePacket.Player;
         serverSession.HandleSEnterGame(requestId, resultCode, playerInfo);
+    }
+
+    public static void S_SpawnHandler(PacketSession session, IMessage packet)
+    {
+        S_Spawn spawnPacket = (S_Spawn)packet;
+        ServerSession serverSession = (ServerSession)session;
+        
+        SpawnObjectInfo spawnObject = spawnPacket.SpawnObject;
+        switch (spawnObject.DetailCase)
+        {
+            case SpawnObjectInfo.DetailOneofCase.Player:
+                Player player = PlayerMapper.ToDomain(spawnObject.Player);
+                serverSession.HandleSSpawnPlayer(player);
+                break;
+            case SpawnObjectInfo.DetailOneofCase.Item:
+                Item item = ItemMapper.ToDomain(spawnObject.Item);
+                serverSession.HandleSSpawnItem(item);
+                break;
+            case SpawnObjectInfo.DetailOneofCase.None:
+                Console.WriteLine("[S_Spawn] Invalid spawn object: detail is none");
+                break;
+        }
+    }
+
+    public static void S_PickItemHandler(PacketSession session, IMessage packet)
+    {
+        S_PickItem pickItemPacket = (S_PickItem)packet;
+        ServerSession serverSession = (ServerSession)session;
+        
+        int requestId = pickItemPacket.RequestId;
+        ResultCode resultCode = pickItemPacket.ResultCode;
+        if (resultCode != ResultCode.Success)
+        {
+           Console.WriteLine($"Pick Item failed: {resultCode}");
+           return;
+        }
+        
+        Item item = ItemMapper.ToDomain(pickItemPacket.ItemInfo);
+        serverSession.HandleSPickItem(requestId, resultCode, item);
     }
 }

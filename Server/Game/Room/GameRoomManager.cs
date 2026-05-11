@@ -1,3 +1,5 @@
+using Google.Protobuf.Protocol;
+
 namespace ServerSkills.Game.Room;
 
 public class GameRoomManager
@@ -11,14 +13,25 @@ public class GameRoomManager
     {
     }
 
-
-    // 생성
+    // 이상해? CreateItemRequest가 매니저 안에 있는게?
+    public void SpawnItemAll()
+    {
+        foreach (GameRoom room in _rooms.Values)
+        {
+            CreateItemRequest request = new CreateItemRequest();
+            request.ObjectId = ObjectManager.Instance.GenerateId(GameObjectType.ITEM, 101);
+            request.Name = "집행검";
+            request.Count = 1;
+            
+            Item item = ItemFactory.Create(request);
+            room.SpawnItem(item);
+        }
+    }
+    
     public Dictionary<int, GameRoom> Creates(int roomCount = 1)
     {
         for (int i = 0; i < roomCount; i++)
-        {
             _rooms.Add(i, new GameRoom(i));
-        }
 
         return _rooms;
     }

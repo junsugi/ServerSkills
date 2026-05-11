@@ -1,6 +1,6 @@
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
-using ServerSkills;
+using ServerCore;
 
 namespace DummyClient.Session;
 

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using DummyClient.Packet;
 using DummyClient.Session;
+using ServerCore;
 using ServerSkills.Monitoring;
 
 namespace DummyClient;
@@ -44,10 +45,10 @@ class Program
             return serverSession;
         };
 
-        int total = 1000;
+        int total = 100;
         int workerCount = 5;
         int perWorker = total / workerCount;
-        int delayMs = 500;
+        int delayMs = 50;
 
         List<Task> tasks = new();
 

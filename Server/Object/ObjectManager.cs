@@ -45,7 +45,7 @@ public class ObjectManager: JobSerializer
             {
                 Player player = gameObject as Player;
                 _players.Add(player.ObjectId, player);
-                Thread.Sleep(100);
+                // Thread.Sleep(100);
             }
             
             long endAt = Stopwatch.GetTimestamp();
@@ -62,7 +62,7 @@ public class ObjectManager: JobSerializer
         return ((int)type << 24) | id;
     }
 
-    public static GameObjectType GetObjectTypeById(int id)
+    public GameObjectType GetObjectTypeById(int id)
     {
         int type = (id >> 24) & 0x7F;
         return (GameObjectType)type;

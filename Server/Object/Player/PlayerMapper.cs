@@ -9,11 +9,11 @@ public static class PlayerMapper
         ObjectInfo objectInfo = new ObjectInfo()
         {
             ObjectId = player.ObjectId,
-            NickName = player.NickName,
         };
         PlayerInfo playerInfo = new PlayerInfo()
         {
             ObjectInfo = objectInfo,
+            NickName = player.NickName,
             Hp = 100,
             Atk = 5,
             Def = 5

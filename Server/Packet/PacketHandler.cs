@@ -1,5 +1,6 @@
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
+using ServerCore;
 
 namespace ServerSkills.Packet;
 
@@ -30,5 +31,24 @@ public class PacketHandler
 
         int requestId = enterPacket.RequestId;
         clientSession.HandleCEnterGame(requestId);
+    }
+
+    public static void C_ReadyForTestHandler(PacketSession session, IMessage packet)
+    {
+        C_ReadyForTest testPacket =  (C_ReadyForTest)packet;
+        ClientSession clientSession = (ClientSession)session;
+        
+        clientSession.HandleCReadyForTest();
+    }
+    
+    public static void C_PickItemHandler(PacketSession session, IMessage packet)
+    {
+        C_PickItem pickItemPacket =  (C_PickItem)packet;
+        ClientSession clientSession = (ClientSession)session;
+        
+        int requestId = pickItemPacket.RequestId;
+        int objectId = pickItemPacket.ObjectId;
+        
+        clientSession.HandleCPickItem(requestId, objectId);
     }
 }

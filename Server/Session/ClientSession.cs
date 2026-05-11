@@ -1,5 +1,6 @@
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
+using ServerCore;
 using ServerSkills.Packet;
 
 namespace ServerSkills;

@@ -9,7 +9,7 @@ public static class PlayerMapper
         Player player = new Player()
         {
             ObjectId = playerInfo.ObjectInfo.ObjectId,
-            NickName = playerInfo.ObjectInfo.NickName,
+            NickName = playerInfo.NickName,
             Hp = playerInfo.Hp,
             Atk = playerInfo.Atk,
             Def = playerInfo.Def,

@@ -1,6 +1,7 @@
 using DummyClient.Session;
 using Google.Protobuf;
 using Google.Protobuf.Protocol;
+using ServerCore;
 using ServerSkills;
 using ServerSkills.Packet;
 
@@ -29,6 +30,10 @@ public class PacketManager
         _handler.Add((ushort)MsgId.SLogin, PacketHandler.S_LoginHandler);       
         _onRecv.Add((ushort)MsgId.SEnterGame, MakePacket<S_EnterGame>);
         _handler.Add((ushort)MsgId.SEnterGame, PacketHandler.S_EnterGameHandler);
+        _onRecv.Add((ushort)MsgId.SSpawn, MakePacket<S_Spawn>);
+        _handler.Add((ushort)MsgId.SSpawn, PacketHandler.S_SpawnHandler);
+        _onRecv.Add((ushort)MsgId.SPickItem, MakePacket<S_PickItem>);
+        _handler.Add((ushort)MsgId.SPickItem, PacketHandler.S_PickItemHandler);
     }    
 
     public void OnRecvPacket(ServerSession session, ArraySegment<byte> buffer)

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Google.Protobuf.Protocol;
+using ServerCore;
 using ServerSkills.Game.Room;
 using ServerSkills.Login;
 using ServerSkills.Monitoring;
@@ -70,7 +71,21 @@ public partial class ClientSession(
         loginPacket.Result = ResultCode.Success;
         Send(loginPacket);
     }
+    
+    public void HandleCReadyForTest()
+    {
+        TestManager testManager = TestManager.Instance;
+        testManager.IncreasePlayer();
+        
+        if (!testManager.IsDoneTargetPlayer())
+            return;
+        
+        Console.WriteLine("[C_READY_FOR_TEST] Done!");
+        GameRoomManager.Instance.SpawnItemAll();
+    }
 
+    #region EnterGame
+    
     public void HandleCEnterGame(int requestId)
     {
         switch (enterGameMode)
@@ -209,4 +224,6 @@ public partial class ClientSession(
     {
         return tick * 1000 / Stopwatch.Frequency;
     }
+    
+    #endregion
 }

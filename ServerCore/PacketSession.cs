@@ -1,6 +1,6 @@
 using ServerCore;
 
-namespace ServerSkills;
+namespace ServerCore;
 
 public abstract class PacketSession : Session
 {

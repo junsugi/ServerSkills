@@ -1,5 +1,5 @@
 using Google.Protobuf.Protocol;
-using ServerSkills;
+using ServerCore;
 using Player = DummyClient.Object.Player;
 using PlayerMapper = DummyClient.Object.PlayerMapper;
 

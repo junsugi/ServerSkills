@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using ServerCore;
 
-namespace DummyClient;
+namespace ServerCore;
 
 public class Connector
 {

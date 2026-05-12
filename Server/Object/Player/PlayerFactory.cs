@@ -15,7 +15,8 @@ public class PlayerFactory
             NickName = dto.NickName,
             Hp = 100,
             Atk = 5,
-            Def = 5
+            Def = 5,
+            Inventory =  new Inventory(),
         };
 
         return player;

@@ -85,8 +85,9 @@ public class GameRoom(int roomId) : JobSerializer
         
         Thread.Sleep(100); // 경합 상황 일부러 키우기
         Item item = _items[objectId];
-        Console.WriteLine($"[Pick Success?] Room={RoomId}, Player={player.ObjectId}, Item={item.ObjectId}/{item.Name}");
+        player.Inventory.TryAdd(item);
         _items.Remove(objectId);
+        Console.WriteLine($"[Pick Success?] Room={RoomId}, Player={player.ObjectId}, Item={item.ObjectId}/{item.Name}");
 
         player.Session.SendPickItem(requestId, ResultCode.Success, item);
     }

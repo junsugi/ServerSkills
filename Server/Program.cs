@@ -26,7 +26,7 @@ class Program
         Console.WriteLine($"Listening on {endPoint.Address}:{endPoint.Port}");
 
         // 모니터링 시작
-        Task.Run(MonitoringLoop);
+        Task.Run(() => MonitoringLoop(gameRooms));
 
         // Queue Flush
         Task.Run(async () =>
@@ -53,7 +53,7 @@ class Program
         Thread.Sleep(Timeout.Infinite);
     }
 
-    private static async Task MonitoringLoop()
+    private static async Task MonitoringLoop(Dictionary<int, GameRoom> gameRooms)
     {
         while (true)
         {
@@ -69,6 +69,11 @@ class Program
                     $"P99={snapshot.P99}ms, " +
                     $"Max={snapshot.Max}ms"
                 );
+            }
+            
+            foreach (GameRoom room in gameRooms.Values.OrderBy(r => r.RoomId))
+            {
+                room.Metrics.Print(room.RoomId);
             }
 
             GameRoomManager.Instance.PrintRoomStatus();

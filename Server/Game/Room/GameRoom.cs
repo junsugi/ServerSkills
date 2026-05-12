@@ -3,16 +3,18 @@ using Google.Protobuf;
 using Google.Protobuf.Protocol;
 using Microsoft.VisualBasic;
 using ServerSkills.Job;
+using ServerSkills.Monitoring;
 
 namespace ServerSkills.Game.Room;
 
-public class GameRoom(int roomId) : JobSerializer
+public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMetrics metrics) : JobSerializer
 {
     public int RoomId {get; set;} = roomId;
     public int PlayerCount => _players.Count;
+    public PickItemMetrics Metrics { get; } = metrics;
 
     private Dictionary<int, Player> _players = new();
-    private Dictionary<int, Item> _items = new();
+    private Dictionary<int, RoomItem> _roomItems = new();
     
     public void BroadCast(IMessage packet)
     {
@@ -55,8 +57,10 @@ public class GameRoom(int roomId) : JobSerializer
         Push(() =>
         {
             S_Spawn packet = new S_Spawn();
+
+            RoomItem roomItem = new RoomItem(item);
         
-            if (!_items.TryAdd(item.ObjectId, item))
+            if (!_roomItems.TryAdd(roomItem.ObjectId, roomItem))
             {
                 Console.WriteLine("Add item failed");
                 packet.ResultCode = ResultCode.InternalError;
@@ -73,21 +77,10 @@ public class GameRoom(int roomId) : JobSerializer
 
     public void PickItemUnsafe(Player player, int requestId, int objectId)
     {
-        if (!_items.ContainsKey(objectId))
-        {
-            Console.WriteLine($"[Pick Failed] Room={RoomId}, Player={player.ObjectId}, Item={objectId}");
-            S_PickItem pickItemPacket = new S_PickItem();
-            pickItemPacket.RequestId = requestId;
-            pickItemPacket.ResultCode = ResultCode.InvalidRequest;
-            player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
-            return;
-        }
-        
-        Thread.Sleep(100); // 경합 상황 일부러 키우기
-        Item item = _items[objectId];
-        Console.WriteLine($"[Pick Success?] Room={RoomId}, Player={player.ObjectId}, Item={item.ObjectId}/{item.Name}");
-        _items.Remove(objectId);
-
-        player.Session.SendPickItem(requestId, ResultCode.Success, item);
+        pickItemStrategy.Pick(this, player, requestId, objectId);
     }
+
+    internal bool HasRoomItem(int objectId) => _roomItems.ContainsKey(objectId);
+    internal RoomItem? GetRoomItem(int objectId) => _roomItems.GetValueOrDefault(objectId);
+    internal bool RemoveRoomItem(int objectId) => _roomItems.Remove(objectId);
 }

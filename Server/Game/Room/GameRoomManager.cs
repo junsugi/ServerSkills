@@ -31,7 +31,7 @@ public class GameRoomManager
     public Dictionary<int, GameRoom> Creates(int roomCount = 1)
     {
         for (int i = 0; i < roomCount; i++)
-            _rooms.Add(i, new GameRoom(i));
+            _rooms.Add(i, GameRoomFactory.Create(i));
 
         return _rooms;
     }

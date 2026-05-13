@@ -23,7 +23,6 @@ public partial class ClientSession(
     public AccountDto? AccountDto;
 
     private SessionState _sessionState = SessionState.None;
-    private object _lock = new object();
     
     public void SetPlayer(Player player)
     {

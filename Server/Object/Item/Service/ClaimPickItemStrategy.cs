@@ -12,12 +12,12 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
     {
         metrics.OnRequest(player.ObjectId, objectId);
         
-        Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][PICKUP_REQUEST] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, requestId={requestId}");
+        // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][PICKUP_REQUEST] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, requestId={requestId}");
         
         if (!gameRoom.HasRoomItem(objectId))
         {
             Interlocked.Increment(ref metrics.ClaimFail);
-            Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId=0, reason=ALREADY_PICKUP");
+            // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId=0, reason=ALREADY_PICKUP");
             player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
             return;
         }
@@ -26,7 +26,7 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
         if (!roomItem.TryClaim(player.ObjectId))
         {
             Interlocked.Increment(ref metrics.ClaimFail);
-            Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId={roomItem.GetClaimedByPlayerId()}");
+            // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId={roomItem.GetClaimedByPlayerId()}");
             player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
             return;
         }
@@ -40,18 +40,18 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
         if (forceCommitFail || !player.Inventory.TryAdd(roomItem.Item))
         {
             Interlocked.Increment(ref metrics.CommitFail);
-            Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][COMMIT_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, reason=INVENTORY_REJECTED");
+            // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][COMMIT_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, reason=INVENTORY_REJECTED");
 
             if (roomItem.RollbackClaim(player.ObjectId))
             {
                 Interlocked.Increment(ref metrics.RollbackCount);
-                Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][ROLLBACK_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
+                // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][ROLLBACK_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
             }
             
             player.Session.SendPickItem(requestId, ResultCode.InternalError);
             return;
         }
-        Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][COMMIT_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
+        // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][COMMIT_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
 
         gameRoom.RemoveRoomItem(objectId);
         metrics.OnSuccess(player.ObjectId, objectId);

@@ -7,8 +7,9 @@ public static class GameRoomFactory
 {
     public static GameRoom Create(int roomId)
     {
-        PickItemMetrics metrics = new PickItemMetrics();
+        PickItemMetrics pickMetrics = new PickItemMetrics();
+        MoveMetrics moveMetrics = new MoveMetrics();
         // 여기서 전략 수정
-        return new GameRoom(roomId, new ClaimPickItemStrategy(metrics), metrics);
+        return new GameRoom(roomId, new ClaimPickItemStrategy(pickMetrics), pickMetrics, moveMetrics);
     }
 }

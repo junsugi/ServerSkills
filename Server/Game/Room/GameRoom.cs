@@ -6,7 +6,11 @@ using ServerSkills.Monitoring;
 
 namespace ServerSkills.Game.Room;
 
-public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMetrics pickMetrics, MoveMetrics moveMetrics) : JobSerializer
+public class GameRoom(
+    int roomId,
+    IPickItemStrategy pickItemStrategy,
+    PickItemMetrics pickMetrics,
+    MoveMetrics moveMetrics) : JobSerializer
 {
     public int RoomId { get; set; } = roomId;
     public int PlayerCount => _players.Count;
@@ -19,7 +23,7 @@ public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMe
     private int BroadCast(IMessage packet, Player? exceptPlayer)
     {
         int sendCount = 0;
-        
+
         foreach (Player player in _players.Values)
         {
             if (player == exceptPlayer)
@@ -32,6 +36,7 @@ public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMe
     }
 
     private const float AoiRange = 3f;
+
     private bool IsInAoi(Player center, Player target)
     {
         float dx = Math.Abs(center.Position.X - target.Position.X);
@@ -39,7 +44,7 @@ public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMe
 
         return dx <= AoiRange && dy <= AoiRange;
     }
-    
+
     private int BroadCastAoi(IMessage packet, Player centerPlayer)
     {
         int sendCount = 0;
@@ -55,7 +60,7 @@ public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMe
 
         return sendCount;
     }
-    
+
 
     public void EnterGame(int requestId, GameObject? gameObject, Action<int, JobMetrics> onCompleted)
     {
@@ -139,9 +144,19 @@ public class GameRoom(int roomId, IPickItemStrategy pickItemStrategy, PickItemMe
             movePacket.RequestId = requestId;
             movePacket.ResultCode = ResultCode.Success;
             movePacket.Player = PlayerMapper.ToDto(player);
-            
+
             int count = BroadCastAoi(movePacket, player);
             MoveMetrics.RecordMove(count);
+        });
+    }
+
+    public void LeaveGame(Player leavePlayer)
+    {
+        Push(() =>
+        {
+            _players.Remove(leavePlayer.ObjectId);
+            leavePlayer.GameRoom = null;
+            leavePlayer.Session = null;
         });
     }
 

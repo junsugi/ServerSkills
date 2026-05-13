@@ -31,7 +31,15 @@ public partial class ClientSession : PacketSession
 
     public override void OnDisconnected()
     {
-        throw new NotImplementedException();
+        if (MyPlayer == null)
+            return;
+        
+        if (MyPlayer.GameRoom != null)
+            MyPlayer.GameRoom.LeaveGame(MyPlayer);
+
+        _sessionState = SessionState.None;
+        MyPlayer = null;
+        AccountDto = null;
     }
 
     public override void OnSend()

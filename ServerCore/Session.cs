@@ -10,21 +10,21 @@ public abstract class Session
 
     private RecvBuffer _recvBuffer = new RecvBuffer(65535);
     private Queue<ArraySegment<byte>> _sendQueue = new Queue<ArraySegment<byte>>();
-    private List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>(); 
+    private List<ArraySegment<byte>> _pendingList = new List<ArraySegment<byte>>();
 
     private bool _isConnected = true;
     private object _lock = new object();
-    
+
     public void Start(Socket acceptSocket)
     {
         _socket = acceptSocket;
-        
+
         _recvArgs.Completed += OnRecvCompleted;
         _sendArgs.Completed += OnSendCompleted;
 
         RegisterRecv();
     }
-    
+
     public void Send(ArraySegment<byte> buffer)
     {
         if (buffer.Count == 0)
@@ -107,6 +107,7 @@ public abstract class Session
             ArraySegment<byte> buffer = _sendQueue.Dequeue();
             _pendingList.Add(buffer);
         }
+
         _sendArgs.BufferList = _pendingList;
 
         try
@@ -149,16 +150,30 @@ public abstract class Session
     private void Disconnected()
     {
         if (Interlocked.Exchange(ref _isConnected, false) == false)
-            throw new Exception("Still connected");
+            return;
 
-        // OnDisconnected();
-        _socket.Shutdown(SocketShutdown.Both);
-        _socket.Close();
+        OnDisconnected();
+        try
+        {
+            _socket.Shutdown(SocketShutdown.Both);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        try
+        {
+            _socket.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     public abstract void OnConnected();
     public abstract void OnDisconnected();
     public abstract int OnRecv(ArraySegment<byte> segment);
     public abstract void OnSend();
-
 }

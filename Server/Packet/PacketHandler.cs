@@ -58,9 +58,7 @@ public class PacketHandler
         ClientSession clientSession = (ClientSession)session;
 
         int requestId = movePacket.ReqeustId;
-        float x = movePacket.Position.X;
-        float y = movePacket.Position.Y;
 
-        clientSession.HandleCMove(requestId, x, y);
+        clientSession.HandleCMove(requestId);
     }
 }

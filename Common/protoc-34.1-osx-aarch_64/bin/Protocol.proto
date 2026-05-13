@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package Protocol;
+option csharp_namespace = "Google.Protobuf.Protocol";
+
+enum MsgId {
+  C_CONNECTED = 0;
+  S_CONNECTED = 1;
+  C_SIGN_UP = 2;
+  S_SIGN_UP = 3;
+  C_LOGIN = 4;
+  S_LOGIN = 5;
+  C_ENTER_GAME = 6;
+  S_ENTER_GAME = 7;
+  S_SPAWN = 8;
+  C_PICK_ITEM = 9;
+  S_PICK_ITEM = 10;
+  C_READY_FOR_TEST = 11;
+  C_MOVE = 12;
+  S_MOVE = 13;
+}
+
+enum ResultCode {
+  SUCCESS = 0;
+  INTERNAL_ERROR = 1;
+  NOT_FOUND = 2;
+  ALREADY_EXIST = 3;
+  INVALID_REQUEST = 4;
+  UNAUTHORIZAED = 5;
+}
+
+message C_Connected {
+  int32 requestId = 1;
+}
+
+message S_Connected {
+  int32 requestId = 1;
+  ResultCode result = 2;
+}
+
+message C_Login {
+  int32 requestId = 1;
+  string id = 2;
+}
+
+message S_Login {
+  int32 requestId = 1;
+  ResultCode result = 2;
+}
+
+message C_EnterGame {
+  int32 requestId = 1;
+}
+
+message S_EnterGame {
+  int32 requestId = 1;
+  ResultCode result = 2;
+  PlayerInfo player = 3;
+}
+
+message S_Spawn {
+  ResultCode resultCode = 1;
+  SpawnObjectInfo spawnObject = 2;
+}
+
+message C_PickItem {
+  int32 requestId = 1;
+  int32 objectId = 2;
+}
+
+message S_PickItem {
+  int32 requestId = 1;
+  ResultCode resultCode = 2;
+  ItemInfo itemInfo = 3;
+}
+
+message C_Move {
+  int32 reqeustId = 1;
+}
+
+message S_Move {
+  int32 requestId = 1;
+  ResultCode resultCode = 2;
+  PlayerInfo player = 3;
+}
+
+message C_ReadyForTest {
+}
+
+message SpawnObjectInfo {
+  oneof detail {
+    PlayerInfo player = 1;
+    ItemInfo item = 2;
+  }
+}
+
+message PlayerInfo {
+  ObjectInfo objectInfo = 1;
+  string nickName = 2;
+  int32 hp = 3;
+  int32 atk = 4;
+  int32 def = 5;
+}
+
+message ItemInfo {
+  ObjectInfo objectInfo = 1;
+  string name = 2;
+  int32 count = 3;
+}
+
+message ObjectInfo {
+  int32 objectId = 1;
+  Position position = 2;
+}
+
+message Position {
+  float x = 1;
+  float y = 2;
+}

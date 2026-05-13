@@ -9,6 +9,11 @@ public static class PlayerMapper
         ObjectInfo objectInfo = new ObjectInfo()
         {
             ObjectId = player.ObjectId,
+            Position = new Google.Protobuf.Protocol.Position()
+            {
+                X = player.Position.X,
+                Y = player.Position.Y,
+            }
         };
         PlayerInfo playerInfo = new PlayerInfo()
         {

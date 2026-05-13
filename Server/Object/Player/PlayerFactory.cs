@@ -17,6 +17,7 @@ public class PlayerFactory
             Atk = 5,
             Def = 5,
             Inventory =  new Inventory(),
+            Position = new Position()
         };
 
         return player;

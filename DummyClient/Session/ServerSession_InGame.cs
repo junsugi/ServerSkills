@@ -1,4 +1,5 @@
 using DummyClient.Object;
+using DummyClient.Packet;
 using Google.Protobuf.Protocol;
 using ServerCore;
 
@@ -8,7 +9,15 @@ public partial class ServerSession : PacketSession
 {
     public void HandleSSpawnPlayer(Player player)
     {
-        // TODO
+        if (!IsEnterGame())
+            return;
+
+        bool isSuccess = _dummyClient.OnPlayerSpawn(player);
+        if (!isSuccess)
+        {
+            Console.WriteLine("[S_SpawnPlayer] Failed to spawn player");
+            return;
+        }
     }
 
     public void HandleSSpawnItem(Item item)
@@ -32,6 +41,14 @@ public partial class ServerSession : PacketSession
             return;
         
         _dummyClient.OnPickItem(requestId, resultCode, item);
+    }
+    
+    public void HandleSMoveHandler(Player player, int requestId, ResultCode resultCode)
+    {
+        if (!IsEnterGame())
+            return;
+        
+        _dummyClient.OnMove(requestId, resultCode, player);
     }
 
     private bool IsEnterGame()

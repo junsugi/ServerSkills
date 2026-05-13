@@ -8,4 +8,5 @@ public class GameObject
     public GameObjectType ObjectType { get; set; }
     public GameRoom GameRoom { get; set; }
     public ClientSession Session { get; set; }
+    public Position Position { get; set; }
 }

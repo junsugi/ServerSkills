@@ -77,4 +77,16 @@ public class PacketHandler
         Item item = ItemMapper.ToDomain(pickItemPacket.ItemInfo);
         serverSession.HandleSPickItem(requestId, resultCode, item);
     }
+
+    public static void S_MoveHandler(PacketSession session, IMessage packet)
+    {
+        S_Move movePacket = (S_Move)packet;
+        ServerSession serverSession = (ServerSession)session;
+
+        int requestId = movePacket.RequestId;
+        ResultCode resultCode = movePacket.ResultCode;
+        Player player = PlayerMapper.ToDomain(movePacket.Player);
+        
+        serverSession.HandleSMoveHandler(player, requestId, resultCode);
+    }
 }

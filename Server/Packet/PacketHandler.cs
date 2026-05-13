@@ -51,4 +51,14 @@ public class PacketHandler
         
         clientSession.HandleCPickItem(requestId, objectId);
     }
+
+    public static void C_MoveHandler(PacketSession session, IMessage packet)
+    {
+        C_Move movePacket =  (C_Move)packet;
+        ClientSession clientSession = (ClientSession)session;
+
+        int requestId = movePacket.ReqeustId;
+
+        clientSession.HandleCMove(requestId);
+    }
 }

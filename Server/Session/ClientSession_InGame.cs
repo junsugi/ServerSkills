@@ -27,4 +27,28 @@ public partial class ClientSession : PacketSession
         pickItemPacket.ItemInfo = item == null ? null : ItemMapper.ToDto(item);
         Send(pickItemPacket);
     }
+    
+    
+    public void HandleCMove(int requestId)
+    {
+        if (_sessionState != SessionState.EnterGame)
+        {
+            S_Move movePacket = new S_Move();
+            movePacket.RequestId = requestId;
+            movePacket.ResultCode = ResultCode.InvalidRequest;
+            Send(movePacket);
+            return;
+        }
+
+        if (MyPlayer == null || MyPlayer.GameRoom == null)
+        {
+            S_Move movePacket = new S_Move();
+            movePacket.RequestId = requestId;
+            movePacket.ResultCode = ResultCode.InternalError;
+            Send(movePacket);
+            return;
+        }
+
+        MyPlayer.GameRoom.Move(MyPlayer, requestId);
+    }
 }

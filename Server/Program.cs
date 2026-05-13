@@ -44,8 +44,15 @@ class Program
             {
                 while (true)
                 {
-                    gameRoom.Flush();
-                    await Task.Delay(1);
+                    try
+                    {
+                        gameRoom.Flush();
+                        await Task.Delay(1);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             });
         }
@@ -59,21 +66,33 @@ class Program
         {
             await Task.Delay(5000);
 
-            foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
-            {
-                Console.WriteLine(
-                    $"[{snapshot.Name}] " +
-                    $"Count={snapshot.Count}, " +
-                    $"Avg={snapshot.Avg:F2}ms, " +
-                    $"P95={snapshot.P95}ms, " +
-                    $"P99={snapshot.P99}ms, " +
-                    $"Max={snapshot.Max}ms"
-                );
-            }
+            // foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
+            // {
+            //     Console.WriteLine(
+            //         $"[{snapshot.Name}] " +
+            //         $"Count={snapshot.Count}, " +
+            //         $"Avg={snapshot.Avg:F2}ms, " +
+            //         $"P95={snapshot.P95}ms, " +
+            //         $"P99={snapshot.P99}ms, " +
+            //         $"Max={snapshot.Max}ms"
+            //     );
+            // }
             
             foreach (GameRoom room in gameRooms.Values.OrderBy(r => r.RoomId))
             {
-                room.Metrics.Print(room.RoomId);
+                // room.PickMetrics.Print(room.RoomId);
+                
+                MoveMetricSnapshot snapshot = room.MoveMetrics.SnapshotAndClear();
+
+                double requestsPerSec = snapshot.MoveRequests / 5.0;
+                double sendsPerSec = snapshot.MoveSends / 5.0;
+                
+                Console.WriteLine(
+                    $"[Room {room.RoomId} Move] " +
+                    $"Requests={requestsPerSec:F1}, " +
+                    $"Sends={sendsPerSec:F1}, " +
+                    $"AvgRecipients={snapshot.AvgRecipients:F2}"
+                );
             }
 
             GameRoomManager.Instance.PrintRoomStatus();

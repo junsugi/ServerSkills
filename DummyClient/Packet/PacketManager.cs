@@ -34,6 +34,8 @@ public class PacketManager
         _handler.Add((ushort)MsgId.SSpawn, PacketHandler.S_SpawnHandler);
         _onRecv.Add((ushort)MsgId.SPickItem, MakePacket<S_PickItem>);
         _handler.Add((ushort)MsgId.SPickItem, PacketHandler.S_PickItemHandler);
+        _onRecv.Add((ushort)MsgId.SMove, MakePacket<S_Move>);
+        _handler.Add((ushort)MsgId.SMove, PacketHandler.S_MoveHandler);
     }    
 
     public void OnRecvPacket(ServerSession session, ArraySegment<byte> buffer)

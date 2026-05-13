@@ -52,6 +52,8 @@ public partial class DummyClient(PendingRequestManager pendingRequestManager)
         // 아이템 스폰 테스트를 위해 더미 패킷 전송
         C_ReadyForTest testPacket = new C_ReadyForTest();
         _serverSession.Send(testPacket);
+        
+        TryMove();
     }
 
     private void RequestCompleted(int requestId)

@@ -28,6 +28,7 @@ public partial class ClientSession(
     public void SetPlayer(Player player)
     {
         MyPlayer = player;
+        RandomPosition();
     }
     
     public void MarkEnterGame()
@@ -214,16 +215,14 @@ public partial class ClientSession(
         return true;
     }
 
-    private bool CanEnterGame()
-    {
-        return _sessionState == SessionState.Authenticated;
-    }
-    
-    
-    private static long ToMs(long tick)
-    {
-        return tick * 1000 / Stopwatch.Frequency;
-    }
+    private bool CanEnterGame() => _sessionState == SessionState.Authenticated;
+    private static long ToMs(long tick) => tick * 1000 / Stopwatch.Frequency;
     
     #endregion
+
+    private void RandomPosition()
+    {
+        MyPlayer.Position.X = Random.Shared.Next(0, 101);
+        MyPlayer.Position.Y = Random.Shared.Next(0, 101);
+    }
 }

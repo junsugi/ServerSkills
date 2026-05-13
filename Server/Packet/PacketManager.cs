@@ -30,7 +30,9 @@ public class PacketManager
         _onRecv.Add((ushort)MsgId.CReadyForTest, MakePacket<C_ReadyForTest>);
         _handler.Add((ushort)MsgId.CReadyForTest, PacketHandler.C_ReadyForTestHandler);  
         _onRecv.Add((ushort)MsgId.CPickItem, MakePacket<C_PickItem>);
-        _handler.Add((ushort)MsgId.CPickItem, PacketHandler.C_PickItemHandler);  
+        _handler.Add((ushort)MsgId.CPickItem, PacketHandler.C_PickItemHandler);
+        _onRecv.Add((ushort)MsgId.CMove, MakePacket<C_Move>);
+        _handler.Add((ushort)MsgId.CMove, PacketHandler.C_MoveHandler);  
     }
 
     public void OnRecvPacket(ClientSession session, ArraySegment<byte> buffer)

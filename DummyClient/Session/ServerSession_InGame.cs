@@ -8,7 +8,20 @@ public partial class ServerSession : PacketSession
 {
     public void HandleSSpawnPlayer(Player player)
     {
-        // TODO
+        if (IsEnterGame())
+            return;
+
+        bool isSuccess = _dummyClient.OnPlayerSpawn(player);
+        if (!isSuccess)
+        {
+            Console.WriteLine("[S_SpawnPlayer] Failed to spawn player");
+            return;
+        }
+
+        float originX = player.Position.X;
+        float originY = player.Position.Y;
+        
+        _dummyClient.TryMove(originX, originY);
     }
 
     public void HandleSSpawnItem(Item item)

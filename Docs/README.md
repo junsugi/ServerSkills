@@ -38,7 +38,7 @@ C# 기반 실시간 게임 서버에서 발생하는
 
 # Architecture
 
-![Architecture](./images/architecture.svg)
+![Architecture](Images/architecture.svg)
 
 ```text
 Client
@@ -89,7 +89,7 @@ Lock Contention 및 Queue 병목을 재현하고 개선했습니다.
 - Queue ownership 분산
 - P99 latency 안정화
 
-→ [Scenario 1 Detail](https://chatgpt.com/c/docs/scenario1-enter-game.md)
+→ [Scenario 1 Detail](Docs/scenario1-enter-game.md)
 
 ---
 
@@ -111,7 +111,7 @@ AOI(Interest Management)를 적용해 전송 비용을 감소시켰습니다.
 - Send packet 비용 감소
 - RTT 안정화
 
-→ [Scenario 2 Detail](https://chatgpt.com/c/docs/scenario2-aoi-broadcast.md)
+→ [Scenario 2 Detail](Docs/scenario2-aoi-broadcast.md)
 
 ---
 
@@ -137,7 +137,7 @@ Atomic Claim 및 Server-authoritative 처리로 해결했습니다.
 - 정합성 보장
     
 
-→ [Scenario 3 Detail](https://chatgpt.com/c/docs/scenario3-item-pickup.md)
+→ [Scenario 3 Detail](Docs/scenario3-item-pickup.md)
 
 ---
 
@@ -152,7 +152,7 @@ ServerSkills/
 │  ├─ scenario1-enter-game.md
 │  ├─ scenario2-aoi-broadcast.md
 │  ├─ scenario3-item-pickup.md
-│  └─ images/
+│  └─ Images/
 │
 ├─ Server/
 ├─ DummyClient/
@@ -160,43 +160,8 @@ ServerSkills/
 └─ Common/
 ```
 
----
-
-# What I Learned
-
-- Lock 기반 보호만으로는 처리량(Throughput)과 확장성(Scalability)에 한계가 존재했다.
-    
-- Ownership 기반 구조가 Lock 경합 감소에 효과적이었다.
-    
-- 병목 분석에서는 평균 Latency보다 Tail latency(P95/P99)가 더 중요한 지표였다.
-    
-- 실시간 서버 환경에서는 정확성 뿐만 아니라 처리량 또한 핵심 고려 요소였다.
-    
-
----
-
-# Limitations
-
-- 실제 DB 대신 Fake Delay 기반 테스트 수행
-- 단일 머신 환경에서만 테스트
-- Packet batching 미구현
-- ECS 구조 미적용
-- CPU affinity 미적용
-
----
-
-# Future Work
-
-- Redis 기반 분산 세션
-- Region Server 구조
-- Packet Batching
-- ECS 기반 World 구조
-- Tick Scheduler 개선
-
----
-
 # References
 
-[[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part4: 게임 서버](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part4/dashboard?cid=324941)
-[[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part7: MMO 컨텐츠 구현 (Unity + C# 서버 연동 기초)](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part7/dashboard?cid=325662)
-[[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part9: MMO 컨텐츠 구현 (DB연동 + 대형 구조 + 라이브 준비)](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part9/dashboard?cid=325882)
+- [[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part4: 게임 서버](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part4/dashboard?cid=324941)
+- [[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part7: MMO 컨텐츠 구현 (Unity + C# 서버 연동 기초)](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part7/dashboard?cid=325662)
+- [[C#과 유니티로 만드는 MMORPG 게임 개발 시리즈] Part9: MMO 컨텐츠 구현 (DB연동 + 대형 구조 + 라이브 준비)](https://www.inflearn.com/course/%EC%9C%A0%EB%8B%88%ED%8B%B0-mmorpg-%EA%B0%9C%EB%B0%9C-part9/dashboard?cid=325882)

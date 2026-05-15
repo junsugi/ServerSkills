@@ -137,7 +137,7 @@ public class GameRoom(
 
     public void PickItem(Player player, int requestId, int objectId)
     {
-        pickItemStrategy.Pick(this, player, requestId, objectId);
+        Push(() => { pickItemStrategy.Pick(this, player, requestId, objectId); });
     }
 
     public void Move(Player player, int requestId)

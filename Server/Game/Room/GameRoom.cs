@@ -6,8 +6,16 @@ using ServerSkills.Monitoring;
 
 namespace ServerSkills.Game.Room;
 
+public enum PickItemMode
+{
+    Unsafe,
+    Lock,
+    Claim,
+}
+
 public class GameRoom(
     int roomId,
+    PickItemMode mode,
     IPickItemStrategy pickItemStrategy,
     PickItemMetrics pickMetrics,
     MoveMetrics moveMetrics) : JobSerializer
@@ -128,9 +136,18 @@ public class GameRoom(
         });
     }
 
-    public void PickItemUnsafe(Player player, int requestId, int objectId)
+    public void PickItem(Player player, int requestId, int objectId)
     {
-        pickItemStrategy.Pick(this, player, requestId, objectId);
+        switch (mode)
+        {
+            case PickItemMode.Unsafe:
+            case PickItemMode.Lock:
+                pickItemStrategy.Pick(this, player, requestId, objectId);
+                break;
+            case PickItemMode.Claim:
+                Push(() => { pickItemStrategy.Pick(this, player, requestId, objectId); });
+                break;
+        }
     }
 
     public void Move(Player player, int requestId)

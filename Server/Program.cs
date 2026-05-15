@@ -13,7 +13,8 @@ class Program
 
     static void Main(string[] args)
     {
-        Dictionary<int, GameRoom> gameRooms = GameRoomManager.Instance.Creates(4);
+        PickItemMode mode = PickItemMode.Unsafe;
+        Dictionary<int, GameRoom> gameRooms = GameRoomManager.Instance.Creates(4, mode);
 
         IAccountRepository accountRepository = new FakeAccountRepository();
         IAccountService accountService = new AccountService(accountRepository);

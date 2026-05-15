@@ -1,6 +1,5 @@
 using DummyClient.Object;
 using Google.Protobuf.Protocol;
-using Position = DummyClient.Object.Position;
 
 namespace DummyClient;
 
@@ -21,7 +20,7 @@ public partial class DummyClient
 
         C_PickItem pickItemPacket = new C_PickItem()
         {
-            RequestId = pendingRequestManager.Register(nameof(C_PickItem), () => { }),
+            RequestId = pendingRequestManager.Register(nameof(C_PickItem), () => { }), // 멱등성 체크 할 때 고정값으로 수정
             ObjectId = itemObjectId,
         };
 

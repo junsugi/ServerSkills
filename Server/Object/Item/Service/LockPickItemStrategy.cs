@@ -16,7 +16,7 @@ public class LockPickItemStrategy : IPickItemStrategy
             if (!gameRoom.HasRoomItem(objectId))
             {
                 Console.WriteLine($"[Pick Failed] Room={gameRoom.RoomId}, Player={player.ObjectId}, Item={objectId}");
-                player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
+                gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.InvalidRequest);
                 return;
             }
 
@@ -30,6 +30,6 @@ public class LockPickItemStrategy : IPickItemStrategy
 
         }
         
-        player.Session.SendPickItem(requestId, ResultCode.Success, item);
+        gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.Success, item);
     }
 }

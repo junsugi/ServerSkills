@@ -27,7 +27,13 @@ public class GameRoom(
 
     private Dictionary<int, Player> _players = new();
     private Dictionary<int, RoomItem> _roomItems = new();
-
+    
+    private readonly Dictionary<(int playerId, int requestId), PickItemRequestRecord> _pickItemRequests = new();
+    private object _lock = new();
+    
+    private static readonly TimeSpan PickItemRequestTtl = TimeSpan.FromMinutes(1);
+    private const int MaxPickItemRequestCache = 256;
+    
     private int BroadCast(IMessage packet, Player? exceptPlayer)
     {
         int sendCount = 0;
@@ -138,6 +144,12 @@ public class GameRoom(
 
     public void PickItem(Player player, int requestId, int objectId)
     {
+        if (TryReplayPickItem(player, requestId, objectId))
+            return;
+
+        if (!TryBeginPickItem(player.ObjectId, requestId, objectId))
+            return;
+        
         switch (mode)
         {
             case PickItemMode.Unsafe:
@@ -147,6 +159,150 @@ public class GameRoom(
             case PickItemMode.Claim:
                 Push(() => { pickItemStrategy.Pick(this, player, requestId, objectId); });
                 break;
+        }
+    }
+    
+    private bool TryReplayPickItem(Player player, int requestId, int objectId)
+    {
+        PickItemRequestRecord? record;
+
+        lock (_lock)
+        {
+            PruneExpiredPickItemRequests();
+
+            if (!_pickItemRequests.TryGetValue((player.ObjectId, requestId), out record))
+                return false;
+
+            if (record.ObjectId != objectId)
+            {
+                LogPickItemIdempotency(
+                    "PICK_IDEMPOTENCY_CONFLICT",
+                    player.ObjectId,
+                    requestId,
+                    objectId,
+                    $"originalItemId={record.ObjectId}");
+                
+                record = new PickItemRequestRecord()
+                {
+                    ObjectId = objectId,
+                    State = PickItemRequestState.Completed,
+                    ResultCode = ResultCode.InvalidRequest,
+                    ExpiresAt = DateTimeOffset.UtcNow.Add(PickItemRequestTtl),
+                };
+            } 
+            else if (record.State == PickItemRequestState.Pending)
+            {
+                LogPickItemIdempotency(
+                    "PICK_IDEMPOTENCY_PENDING",
+                    player.ObjectId,
+                    requestId,
+                    objectId);
+                return true;
+            }
+        }
+        
+        LogPickItemIdempotency(
+            "PICK_IDEMPOTENCY_REPLAY",
+            player.ObjectId,
+            requestId,
+            objectId,
+            $"resultCode={record.ResultCode}");
+        
+        S_PickItem packet = new S_PickItem
+        {
+            RequestId = requestId,
+            ResultCode = record.ResultCode,
+            ItemInfo = record.ItemInfo?.Clone(),
+        };
+
+        player.Session.Send(packet);
+        return true;
+    }
+    
+    private bool TryBeginPickItem(int playerId, int requestId, int objectId)
+    {
+        lock (_lock)
+        {
+            PruneExpiredPickItemRequests();
+
+            if (_pickItemRequests.ContainsKey((playerId, requestId)))
+                return false;
+
+            _pickItemRequests[(playerId, requestId)] = new PickItemRequestRecord
+            {
+                ObjectId = objectId,
+                State = PickItemRequestState.Pending,
+                ExpiresAt = DateTimeOffset.UtcNow.Add(PickItemRequestTtl),
+            };
+            
+            LogPickItemIdempotency("PICK_IDEMPOTENCY_BEGIN", playerId, requestId, objectId);
+
+            return true;
+        }
+    }
+    
+    internal void CompletePickItemRequest(
+        Player player,
+        int requestId,
+        int objectId,
+        ResultCode resultCode,
+        Item? item = null)
+    {
+        ItemInfo? itemInfo = item == null ? null : ItemMapper.ToDto(item);
+        
+        lock (_lock)
+        {
+            _pickItemRequests[(player.ObjectId, requestId)] = new PickItemRequestRecord
+            {
+                ObjectId = objectId,
+                State = PickItemRequestState.Completed,
+                ResultCode = resultCode,
+                ItemInfo = itemInfo?.Clone(),
+                ExpiresAt = DateTimeOffset.UtcNow.Add(PickItemRequestTtl),
+            };
+
+            LogPickItemIdempotency(
+                "PICK_IDEMPOTENCY_COMPLETE",
+                player.ObjectId,
+                requestId,
+                objectId,
+                $"resultCode={resultCode}");
+            
+            PruneExpiredPickItemRequests();
+        }
+        
+        S_PickItem packet = new S_PickItem
+        {
+            RequestId = requestId,
+            ResultCode = resultCode,
+            ItemInfo = itemInfo?.Clone(),
+        };
+
+        player.Session.Send(packet);
+    }
+    
+    private void PruneExpiredPickItemRequests()
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        foreach (var id in _pickItemRequests
+                     .Where(pair => pair.Value.ExpiresAt <= now)
+                     .Select(pair => pair.Key)
+                     .ToList())
+        {
+            _pickItemRequests.Remove(id);
+        }
+
+        if (_pickItemRequests.Count <= MaxPickItemRequestCache)
+            return;
+
+        foreach (var id in _pickItemRequests
+                     .OrderBy(pair => pair.Value.ExpiresAt)
+                     .Take(_pickItemRequests.Count - MaxPickItemRequestCache)
+                     .Select(pair => pair.Key)
+                     .ToList())
+        {
+            _pickItemRequests.Remove(id);
         }
     }
 
@@ -177,6 +333,20 @@ public class GameRoom(
         });
     }
 
+    private void LogPickItemIdempotency(
+        string eventName,
+        int playerId,
+        int requestId,
+        int objectId,
+        string? detail = null)
+    {
+        Console.WriteLine(
+            $"[{DateTimeOffset.Now:HH:mm:ss.fff}][{eventName}] " +
+            $"roomId={RoomId}, playerId={playerId}, itemId={objectId}, requestId={requestId}" +
+            (detail is null ? "" : $", {detail}")
+        );
+    }
+    
     internal bool HasRoomItem(int objectId) => _roomItems.ContainsKey(objectId);
     internal RoomItem? GetRoomItem(int objectId) => _roomItems.GetValueOrDefault(objectId);
     internal bool RemoveRoomItem(int objectId) => _roomItems.Remove(objectId);

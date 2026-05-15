@@ -10,7 +10,7 @@ public class UnsafePickItemStrategy : IPickItemStrategy
         if (!gameRoom.HasRoomItem(objectId))
         {
             Console.WriteLine($"[Pick Failed] Room={gameRoom.RoomId}, Player={player.ObjectId}, Item={objectId}");
-            player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
+            gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.InvalidRequest);
             return;
         }
 
@@ -22,6 +22,6 @@ public class UnsafePickItemStrategy : IPickItemStrategy
         gameRoom.RemoveRoomItem(objectId);
         Console.WriteLine($"[Pick Success?] Room={gameRoom.RoomId}, Player={player.ObjectId}, Item={item.ObjectId}/{item.Name}");
 
-        player.Session.SendPickItem(requestId, ResultCode.Success, item);
+        gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.Success, item);
     }
 }

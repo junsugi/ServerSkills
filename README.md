@@ -38,7 +38,7 @@ C# 기반 실시간 게임 서버에서 발생하는
 
 # Architecture
 
-![Architecture](Images/architecture.svg)
+![Architecture](Docs/Images/architecture.svg)
 
 ---
 # Key Metrics

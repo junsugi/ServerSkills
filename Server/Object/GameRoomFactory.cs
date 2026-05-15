@@ -14,13 +14,13 @@ public static class GameRoomFactory
         switch (mode)
         {
             case PickItemMode.Unsafe:
-                return new GameRoom(roomId, new UnsafePickItemStrategy(), pickMetrics, moveMetrics);
+                return new GameRoom(roomId, mode, new UnsafePickItemStrategy(), pickMetrics, moveMetrics);
             case PickItemMode.Lock:
-                return new GameRoom(roomId, new LockPickItemStrategy(), pickMetrics, moveMetrics);
+                return new GameRoom(roomId, mode, new LockPickItemStrategy(), pickMetrics, moveMetrics);
             case PickItemMode.Claim:
-                return new GameRoom(roomId, new ClaimPickItemStrategy(pickMetrics), pickMetrics, moveMetrics);
+                return new GameRoom(roomId, mode, new ClaimPickItemStrategy(pickMetrics), pickMetrics, moveMetrics);
             default:
-                return new GameRoom(roomId, new UnsafePickItemStrategy(), pickMetrics, moveMetrics);
+                return new GameRoom(roomId, mode, new UnsafePickItemStrategy(), pickMetrics, moveMetrics);
         }
     }
 }

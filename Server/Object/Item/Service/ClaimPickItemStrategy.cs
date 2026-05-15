@@ -18,7 +18,7 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
         {
             Interlocked.Increment(ref metrics.ClaimFail);
             // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId=0, reason=ALREADY_PICKUP");
-            player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
+            gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.InvalidRequest);
             return;
         }
         
@@ -27,7 +27,7 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
         {
             Interlocked.Increment(ref metrics.ClaimFail);
             // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][CLAIM_FAIL] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}, claimedByPlayerId={roomItem.GetClaimedByPlayerId()}");
-            player.Session.SendPickItem(requestId, ResultCode.InvalidRequest);
+            gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.InvalidRequest);
             return;
         }
         
@@ -48,7 +48,7 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
                 // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][ROLLBACK_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
             }
             
-            player.Session.SendPickItem(requestId, ResultCode.InternalError);
+            gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.InternalError);
             return;
         }
         // Console.WriteLine($"[{DateTimeOffset.Now:HH:mm:ss.fff}][COMMIT_SUCCESS] roomId={gameRoom.RoomId}, playerId={player.ObjectId}, itemId={objectId}");
@@ -56,6 +56,6 @@ public class ClaimPickItemStrategy(PickItemMetrics metrics) : IPickItemStrategy
         gameRoom.RemoveRoomItem(objectId);
         metrics.OnSuccess(player.ObjectId, objectId);
         
-        player.Session.SendPickItem(requestId, ResultCode.Success, roomItem.Item);
+        gameRoom.CompletePickItemRequest(player, requestId, objectId, ResultCode.Success, roomItem.Item);
     }
 }

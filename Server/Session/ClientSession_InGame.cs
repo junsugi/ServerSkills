@@ -11,6 +11,7 @@ public partial class ClientSession : PacketSession
         if (type != GameObjectType.ITEM || _sessionState != SessionState.EnterGame)
         {
             S_PickItem pickItemPacket = new S_PickItem();
+            pickItemPacket.RequestId = requestId;
             pickItemPacket.ResultCode = ResultCode.InvalidRequest;
             Send(pickItemPacket);
             return;
@@ -18,16 +19,6 @@ public partial class ClientSession : PacketSession
 
         MyPlayer.GameRoom.PickItem(MyPlayer, requestId, objectId);
     }
-
-    public void SendPickItem(int requestId, ResultCode resultCode, Item? item = null)
-    {
-        S_PickItem pickItemPacket = new S_PickItem();
-        pickItemPacket.RequestId = requestId;
-        pickItemPacket.ResultCode = resultCode;
-        pickItemPacket.ItemInfo = item == null ? null : ItemMapper.ToDto(item);
-        Send(pickItemPacket);
-    }
-    
     
     public void HandleCMove(int requestId)
     {

@@ -175,6 +175,13 @@ public class GameRoom(
 
             if (record.ObjectId != objectId)
             {
+                LogPickItemIdempotency(
+                    "PICK_IDEMPOTENCY_CONFLICT",
+                    player.ObjectId,
+                    requestId,
+                    objectId,
+                    $"originalItemId={record.ObjectId}");
+                
                 record = new PickItemRequestRecord()
                 {
                     ObjectId = objectId,
@@ -185,9 +192,21 @@ public class GameRoom(
             } 
             else if (record.State == PickItemRequestState.Pending)
             {
+                LogPickItemIdempotency(
+                    "PICK_IDEMPOTENCY_PENDING",
+                    player.ObjectId,
+                    requestId,
+                    objectId);
                 return true;
             }
         }
+        
+        LogPickItemIdempotency(
+            "PICK_IDEMPOTENCY_REPLAY",
+            player.ObjectId,
+            requestId,
+            objectId,
+            $"resultCode={record.ResultCode}");
         
         S_PickItem packet = new S_PickItem
         {
@@ -215,6 +234,8 @@ public class GameRoom(
                 State = PickItemRequestState.Pending,
                 ExpiresAt = DateTimeOffset.UtcNow.Add(PickItemRequestTtl),
             };
+            
+            LogPickItemIdempotency("PICK_IDEMPOTENCY_BEGIN", playerId, requestId, objectId);
 
             return true;
         }
@@ -240,6 +261,13 @@ public class GameRoom(
                 ExpiresAt = DateTimeOffset.UtcNow.Add(PickItemRequestTtl),
             };
 
+            LogPickItemIdempotency(
+                "PICK_IDEMPOTENCY_COMPLETE",
+                player.ObjectId,
+                requestId,
+                objectId,
+                $"resultCode={resultCode}");
+            
             PruneExpiredPickItemRequests();
         }
         
@@ -305,6 +333,20 @@ public class GameRoom(
         });
     }
 
+    private void LogPickItemIdempotency(
+        string eventName,
+        int playerId,
+        int requestId,
+        int objectId,
+        string? detail = null)
+    {
+        Console.WriteLine(
+            $"[{DateTimeOffset.Now:HH:mm:ss.fff}][{eventName}] " +
+            $"roomId={RoomId}, playerId={playerId}, itemId={objectId}, requestId={requestId}" +
+            (detail is null ? "" : $", {detail}")
+        );
+    }
+    
     internal bool HasRoomItem(int objectId) => _roomItems.ContainsKey(objectId);
     internal RoomItem? GetRoomItem(int objectId) => _roomItems.GetValueOrDefault(objectId);
     internal bool RemoveRoomItem(int objectId) => _roomItems.Remove(objectId);

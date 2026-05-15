@@ -6,6 +6,13 @@ using ServerSkills.Monitoring;
 
 namespace ServerSkills.Game.Room;
 
+public enum PickItemMode
+{
+    Unsafe,
+    Lock,
+    Claim,
+}
+
 public class GameRoom(
     int roomId,
     IPickItemStrategy pickItemStrategy,
@@ -128,7 +135,7 @@ public class GameRoom(
         });
     }
 
-    public void PickItemUnsafe(Player player, int requestId, int objectId)
+    public void PickItem(Player player, int requestId, int objectId)
     {
         pickItemStrategy.Pick(this, player, requestId, objectId);
     }

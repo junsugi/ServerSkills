@@ -16,7 +16,7 @@ public partial class ClientSession : PacketSession
             return;
         }
 
-        MyPlayer.GameRoom.PickItemUnsafe(MyPlayer, requestId, objectId);
+        MyPlayer.GameRoom.PickItem(MyPlayer, requestId, objectId);
     }
 
     public void SendPickItem(int requestId, ResultCode resultCode, Item? item = null)

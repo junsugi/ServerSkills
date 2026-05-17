@@ -5,7 +5,7 @@ namespace ServerSkills;
 
 public class LockPickItemStrategy : IPickItemStrategy
 {
-    private object _lock = new();
+    private static object _lock = new();
     
     public void Pick(GameRoom gameRoom, Player player, int requestId, int objectId)
     {

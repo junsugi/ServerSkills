@@ -34,6 +34,24 @@ public class GameRoom(
     private static readonly TimeSpan PickItemRequestTtl = TimeSpan.FromMinutes(1);
     private const int MaxPickItemRequestCache = 256;
     
+    public void Move(Player player, int requestId)
+    {
+        Push(() =>
+        {
+            player.Position.X = Math.Clamp(player.Position.X + 0.5f, 0f, 101f);
+            player.Position.Y = Math.Clamp(player.Position.Y + 0.5f, 0f, 101f);
+
+            S_Move movePacket = new S_Move();
+            movePacket.RequestId = requestId;
+            movePacket.ResultCode = ResultCode.Success;
+            movePacket.Player = PlayerMapper.ToDto(player);
+            player.Session.Send(movePacket);
+
+            int count = BroadCastAoi(movePacket, player);
+            MoveMetrics.RecordMove(count);
+        });
+    }
+    
     private int BroadCast(IMessage packet, Player? exceptPlayer)
     {
         int sendCount = 0;
@@ -68,6 +86,9 @@ public class GameRoom(
             if (!IsInAoi(centerPlayer, player))
                 continue;
 
+            if (player == centerPlayer) 
+                continue;
+            
             player.Session.Send(packet);
             sendCount++;
         }
@@ -305,24 +326,7 @@ public class GameRoom(
             _pickItemRequests.Remove(id);
         }
     }
-
-    public void Move(Player player, int requestId)
-    {
-        Push(() =>
-        {
-            player.Position.X = Math.Clamp(player.Position.X + 0.5f, 0f, 101f);
-            player.Position.Y = Math.Clamp(player.Position.Y + 0.5f, 0f, 101f);
-
-            S_Move movePacket = new S_Move();
-            movePacket.RequestId = requestId;
-            movePacket.ResultCode = ResultCode.Success;
-            movePacket.Player = PlayerMapper.ToDto(player);
-
-            int count = BroadCastAoi(movePacket, player);
-            MoveMetrics.RecordMove(count);
-        });
-    }
-
+    
     public void LeaveGame(Player leavePlayer)
     {
         Push(() =>
@@ -340,6 +344,7 @@ public class GameRoom(
         int objectId,
         string? detail = null)
     {
+        
         Console.WriteLine(
             $"[{DateTimeOffset.Now:HH:mm:ss.fff}][{eventName}] " +
             $"roomId={RoomId}, playerId={playerId}, itemId={objectId}, requestId={requestId}" +

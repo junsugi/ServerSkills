@@ -56,8 +56,15 @@ class Program
         {
             tasks.Add(Task.Run(() =>
             {
-                Connector connector = new Connector();
-                connector.Connect(endPoint, createSession, perWorker, delayMs);
+                try
+                {
+                    Connector connector = new Connector();
+                    connector.Connect(endPoint, createSession, perWorker, delayMs);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }));
         }
 

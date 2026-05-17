@@ -67,17 +67,17 @@ class Program
         {
             await Task.Delay(5000);
 
-            // foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
-            // {
-            //     Console.WriteLine(
-            //         $"[{snapshot.Name}] " +
-            //         $"Count={snapshot.Count}, " +
-            //         $"Avg={snapshot.Avg:F2}ms, " +
-            //         $"P95={snapshot.P95}ms, " +
-            //         $"P99={snapshot.P99}ms, " +
-            //         $"Max={snapshot.Max}ms"
-            //     );
-            // }
+            foreach (PacketProfileSnapshot snapshot in _profiler.SnapshotAndClearAll())
+            {
+                Console.WriteLine(
+                    $"[{snapshot.Name}] " +
+                    $"Count={snapshot.Count}, " +
+                    $"Avg={snapshot.Avg:F2}ms, " +
+                    $"P95={snapshot.P95}ms, " +
+                    $"P99={snapshot.P99}ms, " +
+                    $"Max={snapshot.Max}ms"
+                );
+            }
             
             foreach (GameRoom room in gameRooms.Values.OrderBy(r => r.RoomId))
             {

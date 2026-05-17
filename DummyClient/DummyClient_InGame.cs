@@ -20,10 +20,48 @@ public partial class DummyClient
 
         C_PickItem pickItemPacket = new C_PickItem()
         {
-            RequestId = pendingRequestManager.Register(nameof(C_PickItem), () => { }), // 멱등성 체크 할 때 고정값으로 수정
+            RequestId = 777, // 멱등성 체크 할 때 고정값으로 수정
+            ObjectId = itemObjectId,
+        };
+        
+        _serverSession.Send(pickItemPacket);
+    }
+    
+    public void TryPickItemDuplicated(int itemObjectId)
+    {
+        if (!IsItemExist(itemObjectId))
+        {
+            Console.WriteLine($"Item {itemObjectId} doesn't exist");
+            return;
+        }
+
+        int requestId = 777;
+
+        SendPickItem(requestId, itemObjectId);
+        
+        // Pending 상태 replay 확인: 첫 요청 처리 전에 같은 요청 재전송
+        SendPickItem(requestId, itemObjectId);
+        
+        // Conflict용 
+        // SendPickItem(777, itemObjectId);
+        // SendPickItem(777, 34554431);
+
+        // Completed 상태 replay 확인: 응답 완료 이후 같은 요청 재전송
+        Task.Delay(300).ContinueWith(_ =>
+        {
+            SendPickItem(requestId, itemObjectId);
+        });
+    }
+    
+    private void SendPickItem(int requestId, int itemObjectId)
+    {
+        C_PickItem pickItemPacket = new C_PickItem
+        {
+            RequestId = requestId,
             ObjectId = itemObjectId,
         };
 
+        Console.WriteLine($"[PICK_SEND] requestId={requestId}, itemId={itemObjectId}");
         _serverSession.Send(pickItemPacket);
     }
 

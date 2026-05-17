@@ -32,7 +32,7 @@ public partial class ServerSession : PacketSession
             return;
         }
 
-        _dummyClient.TryPickItem(item.ObjectId);
+        _dummyClient.TryPickItemDuplicated(item.ObjectId);
     }
 
     public void HandleSPickItem(int requestId, ResultCode resultCode, Item item)

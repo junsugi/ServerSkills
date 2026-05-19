@@ -1,19 +1,15 @@
 # Real-Time TCP Game Server Portfolio
 
-C# 기반 실시간 게임 서버에서 발생하는  
-동시성 문제, Queue 병목, Broadcast Fan-out 비용,  
-그리고 동시 요청 상황의 정합성 문제를 재현하고 개선한 프로젝트입니다.  
-  
-단순 기능 구현보다  
-서버 구조에서 발생할 수 있는 병목과 Race Condition을 측정 또는 검증하고,  
-구조 개선 과정을 기록하는 데 집중했습니다.
+C# TCP 기반 게임 서버에서 동시 요청, Broadcast 비용, 아이템 중복 획득 문제를 재현하고 개선한 프로젝트입니다.
 
-Scenario 1과 2에서는 RTT, QueueWait, P95/P99, Broadcast Count 등  
-측정 가능한 지표를 기반으로 병목을 분석했습니다.  
-  
-Scenario 3에서는 동일 아이템 동시 Pickup 상황에서  
-Duplicate Claims, Rollback Recovery, Idempotency를 중심으로  
-정합성 보장 여부를 검증했습니다.
+강의 기반 ServerCore 구조를 참고했으며,
+본 프로젝트에서는 다음 부분을 직접 확장했습니다.
+
+- EnterGame 동시 요청 부하 테스트
+- QueueWait / RTT / P95 / P99 측정
+- Room 단위 Ownership Partitioning 비교
+- AOI Broadcast 비용 측정
+- Item Pickup Race Condition / Idempotency 실험
 
 ---
 

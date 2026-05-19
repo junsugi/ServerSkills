@@ -138,7 +138,7 @@ Atomic Claim / Commit / Rollback 구조로 정합성을 보장했습니다.
 - Commit 실패 시 RollbackClaim으로 Claim 상태 복구  
 - 중복 RequestId 기반 Idempotency 처리
 
-→ [Scenario 3 Detail](Docs/scenario3-item-pickup.md)
+→ [Scenario 3 Detail](Docs/Scenario3-item-race-condition.md)
 
 ---
 

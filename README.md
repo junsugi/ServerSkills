@@ -2,11 +2,11 @@
 
 C# TCP 기반 게임 서버에서 동시 요청, Broadcast 비용, 동일 아이템 중복 획득 문제를 재현하고 개선한 프로젝트입니다.
 
-단순히 기능을 구현하는 것보다 “왜 이런 구조가 필요한가”를 확인하는 데 집중했습니다.  
-Lock 기반 처리의 한계, Single JobQueue 병목, Room 단위 Ownership 분리, 
+단순히 기능을 구현하는 것보다 **"왜 이런 구조가 필요한가"** 를 확인하는 데 집중했습니다.  
+Lock 기반 처리의 한계, Single JobQueue 병목, Room 단위 Ownership 분리, <br/>
 AOI Broadcast, Atomic Claim / Idempotency 처리를 직접 비교하며 게임 서버 구조의 필요성을 검증했습니다.
 
-강의 기반 ServerCore 구조를 참고했으며,
+강의 기반 ServerCore 구조를 참고했으며,<br/>
 본 프로젝트에서는 다음 부분을 직접 확장했습니다.
 
 - EnterGame 동시 요청 부하 테스트

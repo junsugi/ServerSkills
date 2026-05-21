@@ -94,7 +94,8 @@ public void Broadcast(IMessage packet, Player? exceptPlayer)
 | 300           |           146.96 |      10874.99 |          74.00 |
 | 400           |           177.87 |      17596.12 |          98.67 |
 | 500           |           215.07 |      26651.49 |         120.99 |
-Full Broadcast는 전체 서버가 아니라 **각 GameRoom 내부 플레이어를 대상으로 수행**되며,
+
+Full Broadcast는 전체 서버가 아니라 **각 GameRoom 내부 플레이어를 대상으로 수행**되며,<br/>
 500명 테스트에서는 Room Sharding 이후 Room당 약 125명 기준으로 Broadcast가 발생한다.
 
 
